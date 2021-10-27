@@ -1,0 +1,107 @@
+﻿    <div name="topnav"></div>
+
+    <div class="navbar navbar-custom navbar-fixed-top">
+        <div class="container" url_home="{% url 'home' %}">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a href="{% url 'home' %}" class="navbar-brand">
+                e-WGD{% if user.is_authenticated %} [{{ user.username }}]{% endif %}
+                </a>
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li class="dropdown">
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" 
+                         aria-haspopup="true" aria-expanded="false">Zoeken <span class="caret"></span></a>
+                      <ul class="dropdown-menu">
+                          <li><a href="#" onclick="set_search('lemmasearch')">Begrippen</a></li>
+                          <li><a href="#" onclick="set_search('locationsearch')">Plaatsen</a></li>
+                          <li><a href="#" onclick="set_search('dialectsearch')">Dialecten</a></li>
+                          <li><a href="#" onclick="set_search('trefwoordsearch')">Trefwoorden</a></li>
+                      </ul>
+                    </li>
+                    {% if user.is_authenticated %}
+                    <li class="dropdown">
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" 
+                         aria-haspopup="true" aria-expanded="false">Ontwikkelaars <span class="caret"></span></a>
+                      <ul class="dropdown-menu">
+                        <li><a href="{% url 'definitions' %}">Definities</a></li>
+                        <li><a href="{% url 'entries' %}">Bewerken</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="{% url 'admin_entry_list' %}">Dialectopgaven</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="{% url 'repair' %}">Repareer...</a></li>
+                      </ul>
+                    </li>
+                    {% endif %}
+                </ul>
+                <form name="toplemmasearch" id="toplemmasearch" class="navbar-form navbar-left"
+                      action="{% url 'lemmasearch' %}">
+                  <div class="form-group">
+                    <input id="search" name="search" type="text" class="form-control" placeholder="Begrip">
+                  </div>
+                </form>
+                <form name="toplocationsearch" id="toplocationsearch" class="navbar-form navbar-left hidden"
+                      action="{% url 'locationsearch' %}">
+                  <div class="form-group">
+                    <input id="search" name="search" type="text" class="form-control" placeholder="Plaats">
+                  </div>
+                </form>
+                <form name="topdialectsearch" id="topdialectsearch" class="navbar-form navbar-left hidden"
+                      action="{% url 'dialectsearch' %}">
+                  <div class="form-group">
+                    <input id="search" name="search" type="text" class="form-control" placeholder="Dialect">
+                  </div>
+                </form>
+                <form name="toptrefwoordsearch" id="toptrefwoordsearch" class="navbar-form navbar-left hidden"
+                      action="{% url 'trefwoordsearch' %}">
+                  <div class="form-group">
+                    <input id="search" name="search" type="text" class="form-control" placeholder="Trefwoord">
+                  </div>
+                </form>
+                
+                <ul class="nav navbar-nav">
+                    <li class="dropdown">
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" 
+                         aria-haspopup="true" aria-expanded="false">Overzichten <span class="caret"></span></a>
+                      <ul class="dropdown-menu">
+                        <li><a href="{% url 'lemmasearch' %}">Begrippen</a></li>
+                        <li><a href="{% url 'dialects' %}">Dialecten</a></li>
+                        <!-- Mines are *NOT* needed for e-WGD 
+                        <li><a href="{% url 'minesearch' %}">Mijnen</a></li>
+                        -->
+                        <li><a href="{% url 'trefwoordsearch' %}">Trefwoorden</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="{% url 'delen' %}">Oorspronkelijke uitgaven</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="{% url 'kloekecodes' %}">Kloekecodes</a></li>
+                      </ul>
+                    </li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="dropdown">
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" 
+                         aria-haspopup="true" aria-expanded="false">Over... <span class="caret"></span></a>
+                      <ul class="dropdown-menu">
+                        <li><a href="{% url 'about' %}">Informatie</a></li>
+                        <li><a href="{% url 'guide' %}">Handleiding</a></li>
+                        <li><a href="{% url 'dialectcheck' %}">Dialectencontrole</a></li>
+                        <li><a href="{% url 'contact' %}">Contact</a></li>
+                        {% if user.is_authenticated %}
+                          <form id="logoutForm" action="{% url 'logout' %}" method="post" class="navbar-right">
+                              {% csrf_token %}
+                          </form>
+                          <li><a href="javascript:document.getElementById('logoutForm').submit()">Uitloggen</a></li>
+                        {% else %}
+                          <li><a href="{% url 'login' %}"><span class="glyphicon glyphicon-user" aria-hidden="true"></span> Beheer</a></li>
+                        {% endif %}
+                      </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>

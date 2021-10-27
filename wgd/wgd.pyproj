@@ -1,0 +1,247 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <Name>wgd</Name>
+    <RootNamespace>wgd</RootNamespace>
+    <InterpreterId>{6ef9c6ab-96b9-4f5e-8d76-5352cd18dc4a}</InterpreterId>
+    <WebBrowserPort>6502</WebBrowserPort>
+    <InterpreterVersion>3.5</InterpreterVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>83e78210-cb49-432c-b609-02982bd30970</ProjectGuid>
+    <ProjectHome>.</ProjectHome>
+    <ProjectTypeGuids>{5F0BE9CA-D677-4A4D-8806-6076C0FAAD37};{349c5851-65df-11da-9384-00065b846f21};{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
+    <StartupFile>manage.py</StartupFile>
+    <SearchPath>
+    </SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <LaunchProvider>Web launcher</LaunchProvider>
+    <DjangoSettingsModule>wgd.settings</DjangoSettingsModule>
+    <OutputPath>.</OutputPath>
+    <WebBrowserUrl>http://localhost</WebBrowserUrl>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="manage.py" />
+    <Compile Include="wgd\dictionary\admin.py" />
+    <Compile Include="wgd\dictionary\adminviews.py" />
+    <Compile Include="wgd\dictionary\apps.py" />
+    <Compile Include="wgd\dictionary\conversion.py" />
+    <Compile Include="wgd\dictionary\fixtures\management\commands\permissions.py" />
+    <Compile Include="wgd\dictionary\fixtures\management\commands\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="wgd\dictionary\fixtures\management\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="wgd\dictionary\forms.py" />
+    <Compile Include="wgd\dictionary\models.py" />
+    <Compile Include="wgd\dictionary\tests.py" />
+    <Compile Include="wgd\dictionary\views.py" />
+    <Compile Include="wgd\dictionary\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="wgd\mapview\admin.py" />
+    <Compile Include="wgd\mapview\apps.py" />
+    <Compile Include="wgd\mapview\models.py" />
+    <Compile Include="wgd\mapview\tests.py" />
+    <Compile Include="wgd\mapview\views.py" />
+    <Compile Include="wgd\mapview\__init__.py" />
+    <Compile Include="wgd\utils.py" />
+    <Compile Include="wgd\__init__.py" />
+    <Compile Include="wgd\settings.py" />
+    <Compile Include="wgd\urls.py" />
+    <Compile Include="wgd\wsgi.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="requirements.txt" />
+    <Content Include="wgd\dictionary\static\dictionary\content\boeken-wgd.jpg" />
+    <Content Include="wgd\dictionary\static\dictionary\content\bootstrap.css" />
+    <Content Include="wgd\dictionary\static\dictionary\content\bootstrap.min.css" />
+    <Content Include="wgd\dictionary\static\dictionary\content\fontawesome-5-all.css" />
+    <Content Include="wgd\dictionary\static\dictionary\content\site.css" />
+    <Content Include="wgd\dictionary\static\dictionary\content\taalkaart-wgd-large.jpg" />
+    <Content Include="wgd\dictionary\static\dictionary\content\taalkaart-wgd-plaatsen.jpg" />
+    <Content Include="wgd\dictionary\static\dictionary\content\taalkaart-wgd.jpg" />
+    <Content Include="wgd\dictionary\static\dictionary\fonts\glyphicons-halflings-regular.eot" />
+    <Content Include="wgd\dictionary\static\dictionary\fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="wgd\dictionary\static\dictionary\fonts\glyphicons-halflings-regular.ttf" />
+    <Content Include="wgd\dictionary\static\dictionary\fonts\glyphicons-halflings-regular.woff" />
+    <None Include="wgd\dictionary\static\dictionary\scripts\_references.js" />
+    <Content Include="wgd\dictionary\static\dictionary\scripts\bootstrap.js" />
+    <Content Include="wgd\dictionary\static\dictionary\scripts\bootstrap.min.js" />
+    <Content Include="wgd\dictionary\static\dictionary\scripts\diadict.js" />
+    <Content Include="wgd\dictionary\static\dictionary\scripts\gtrack.js" />
+    <None Include="wgd\dictionary\static\dictionary\scripts\jquery.validate-vsdoc.js" />
+    <None Include="wgd\dictionary\static\dictionary\scripts\jquery-1.10.2.intellisense.js" />
+    <Content Include="wgd\dictionary\static\dictionary\scripts\jquery-1.10.2.js" />
+    <Content Include="wgd\dictionary\static\dictionary\scripts\jquery-1.10.2.min.js" />
+    <Content Include="wgd\dictionary\static\dictionary\scripts\jquery-1.10.2.min.map" />
+    <Content Include="wgd\dictionary\static\dictionary\scripts\jquery.validate.js" />
+    <Content Include="wgd\dictionary\static\dictionary\scripts\jquery.validate.min.js" />
+    <Content Include="wgd\dictionary\static\dictionary\scripts\jquery.validate.unobtrusive.js" />
+    <Content Include="wgd\dictionary\static\dictionary\scripts\jquery.validate.unobtrusive.min.js" />
+    <Content Include="wgd\dictionary\static\dictionary\scripts\modernizr-2.6.2.js" />
+    <Content Include="wgd\dictionary\static\dictionary\scripts\respond.js" />
+    <Content Include="wgd\dictionary\static\dictionary\scripts\respond.min.js" />
+    <Content Include="wgd\dictionary\static\dictionary\webfonts\fa-brands-400.eot" />
+    <Content Include="wgd\dictionary\static\dictionary\webfonts\fa-brands-400.svg" />
+    <Content Include="wgd\dictionary\static\dictionary\webfonts\fa-brands-400.ttf" />
+    <Content Include="wgd\dictionary\static\dictionary\webfonts\fa-brands-400.woff" />
+    <Content Include="wgd\dictionary\static\dictionary\webfonts\fa-brands-400.woff2" />
+    <Content Include="wgd\dictionary\static\dictionary\webfonts\fa-regular-400.eot" />
+    <Content Include="wgd\dictionary\static\dictionary\webfonts\fa-regular-400.svg" />
+    <Content Include="wgd\dictionary\static\dictionary\webfonts\fa-regular-400.ttf" />
+    <Content Include="wgd\dictionary\static\dictionary\webfonts\fa-regular-400.woff" />
+    <Content Include="wgd\dictionary\static\dictionary\webfonts\fa-regular-400.woff2" />
+    <Content Include="wgd\dictionary\static\dictionary\webfonts\fa-solid-900.eot" />
+    <Content Include="wgd\dictionary\static\dictionary\webfonts\fa-solid-900.svg" />
+    <Content Include="wgd\dictionary\static\dictionary\webfonts\fa-solid-900.ttf" />
+    <Content Include="wgd\dictionary\static\dictionary\webfonts\fa-solid-900.woff" />
+    <Content Include="wgd\dictionary\static\dictionary\webfonts\fa-solid-900.woff2" />
+    <Content Include="wgd\dictionary\templates\dictionary\about.html" />
+    <Content Include="wgd\dictionary\templates\dictionary\admin_entry_list.html" />
+    <Content Include="wgd\dictionary\templates\dictionary\aflevering_list.html" />
+    <Content Include="wgd\dictionary\templates\dictionary\contact.html" />
+    <Content Include="wgd\dictionary\templates\dictionary\dialectviewing.html" />
+    <Content Include="wgd\dictionary\templates\dictionary\dialect_check.html" />
+    <Content Include="wgd\dictionary\templates\dictionary\dialect_list.html" />
+    <Content Include="wgd\dictionary\templates\dictionary\guide.html" />
+    <Content Include="wgd\dictionary\templates\dictionary\import_csv.html" />
+    <Content Include="wgd\dictionary\templates\dictionary\index.html" />
+    <Content Include="wgd\dictionary\templates\dictionary\kloeke_list.html" />
+    <Content Include="wgd\dictionary\templates\dictionary\layout.html" />
+    <Content Include="wgd\dictionary\templates\dictionary\lemma_list.html" />
+    <Content Include="wgd\dictionary\templates\dictionary\lemma_list_oview.html" />
+    <Content Include="wgd\dictionary\templates\dictionary\location_list.html" />
+    <Content Include="wgd\dictionary\templates\dictionary\login.html" />
+    <Content Include="wgd\dictionary\templates\dictionary\mijn_list.html" />
+    <Content Include="wgd\dictionary\templates\dictionary\output.xml" />
+    <Content Include="wgd\dictionary\templates\dictionary\pagination.html" />
+    <Content Include="wgd\dictionary\templates\dictionary\pagination_post.html" />
+    <Content Include="wgd\dictionary\templates\dictionary\repair.html" />
+    <Content Include="wgd\dictionary\templates\dictionary\robots.txt" />
+    <Content Include="wgd\dictionary\templates\dictionary\topnav.html" />
+    <Content Include="wgd\dictionary\templates\dictionary\trefwoord_list.html" />
+    <Content Include="wgd\mapview\migrations\__pycache__\__init__.cpython-35.pyc" />
+    <Content Include="wgd\mapview\static\mapview\content\fontawesome-5-all.css" />
+    <Content Include="wgd\mapview\static\mapview\content\leaflet.css" />
+    <Content Include="wgd\mapview\static\mapview\content\ru.mapview.css" />
+    <Content Include="wgd\mapview\static\mapview\scripts\leaflet-src.js" />
+    <Content Include="wgd\mapview\static\mapview\scripts\oms.min.js" />
+    <Content Include="wgd\mapview\static\mapview\scripts\ru.mapview.js" />
+    <Content Include="wgd\mapview\static\mapview\webfonts\fa-brands-400.eot" />
+    <Content Include="wgd\mapview\static\mapview\webfonts\fa-brands-400.svg" />
+    <Content Include="wgd\mapview\static\mapview\webfonts\fa-brands-400.ttf" />
+    <Content Include="wgd\mapview\static\mapview\webfonts\fa-brands-400.woff" />
+    <Content Include="wgd\mapview\static\mapview\webfonts\fa-brands-400.woff2" />
+    <Content Include="wgd\mapview\static\mapview\webfonts\fa-regular-400.eot" />
+    <Content Include="wgd\mapview\static\mapview\webfonts\fa-regular-400.svg" />
+    <Content Include="wgd\mapview\static\mapview\webfonts\fa-regular-400.ttf" />
+    <Content Include="wgd\mapview\static\mapview\webfonts\fa-regular-400.woff" />
+    <Content Include="wgd\mapview\static\mapview\webfonts\fa-regular-400.woff2" />
+    <Content Include="wgd\mapview\static\mapview\webfonts\fa-solid-900.eot" />
+    <Content Include="wgd\mapview\static\mapview\webfonts\fa-solid-900.svg" />
+    <Content Include="wgd\mapview\static\mapview\webfonts\fa-solid-900.ttf" />
+    <Content Include="wgd\mapview\static\mapview\webfonts\fa-solid-900.woff" />
+    <Content Include="wgd\mapview\static\mapview\webfonts\fa-solid-900.woff2" />
+    <Content Include="wgd\mapview\templates\mapview\map_view.html" />
+    <Content Include="wgd\templates\admin\base.html" />
+    <Content Include="wgd\templates\admin\base_site.html" />
+    <Content Include="wgd\templates\admin\dictionary\info\change_form.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="wgd\" />
+    <Folder Include="wgd\dictionary\" />
+    <Folder Include="wgd\dictionary\fixtures\" />
+    <Folder Include="wgd\dictionary\fixtures\management\" />
+    <Folder Include="wgd\dictionary\fixtures\management\commands\" />
+    <Folder Include="wgd\dictionary\migrations\" />
+    <Folder Include="wgd\dictionary\static\dictionary\" />
+    <Folder Include="wgd\dictionary\static\dictionary\content\" />
+    <Folder Include="wgd\dictionary\static\dictionary\fonts\" />
+    <Folder Include="wgd\dictionary\static\dictionary\scripts\" />
+    <Folder Include="wgd\dictionary\static\dictionary\webfonts\" />
+    <Folder Include="wgd\dictionary\templates\" />
+    <Folder Include="wgd\dictionary\static\" />
+    <Folder Include="wgd\dictionary\templates\dictionary\" />
+    <Folder Include="wgd\mapview\" />
+    <Folder Include="wgd\mapview\migrations\" />
+    <Folder Include="wgd\mapview\migrations\__pycache__\" />
+    <Folder Include="wgd\mapview\static\" />
+    <Folder Include="wgd\mapview\static\mapview\" />
+    <Folder Include="wgd\mapview\static\mapview\content\" />
+    <Folder Include="wgd\mapview\static\mapview\scripts\" />
+    <Folder Include="wgd\mapview\static\mapview\webfonts\" />
+    <Folder Include="wgd\mapview\templates\" />
+    <Folder Include="wgd\mapview\templates\mapview\" />
+    <Folder Include="wgd\templates\" />
+    <Folder Include="wgd\templates\admin\" />
+    <Folder Include="wgd\templates\admin\dictionary\" />
+    <Folder Include="wgd\templates\admin\dictionary\info\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Interpreter Include="..\..\..\..\..\env\ewdict\">
+      <Id>{6ef9c6ab-96b9-4f5e-8d76-5352cd18dc4a}</Id>
+      <BaseInterpreter>{9a7a9026-48c1-4688-9d5d-e5699d47d074}</BaseInterpreter>
+      <Version>3.5</Version>
+      <Description>ewdict (Python 64-bit 3.5)</Description>
+      <InterpreterPath>Scripts\python.exe</InterpreterPath>
+      <WindowsInterpreterPath>Scripts\pythonw.exe</WindowsInterpreterPath>
+      <LibraryPath>Lib\</LibraryPath>
+      <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
+      <Architecture>Amd64</Architecture>
+    </Interpreter>
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.Django.targets" />
+  <!-- Specify pre- and post-build commands in the BeforeBuild and 
+       AfterBuild targets below. -->
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <AutoAssignPort>True</AutoAssignPort>
+          <UseCustomServer>True</UseCustomServer>
+          <CustomServerUrl>http://localhost</CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}" User="">
+        <WebProjectProperties>
+          <StartPageUrl>
+          </StartPageUrl>
+          <StartAction>CurrentPage</StartAction>
+          <AspNetDebugging>True</AspNetDebugging>
+          <SilverlightDebugging>False</SilverlightDebugging>
+          <NativeDebugging>False</NativeDebugging>
+          <SQLDebugging>False</SQLDebugging>
+          <ExternalProgram>
+          </ExternalProgram>
+          <StartExternalURL>
+          </StartExternalURL>
+          <StartCmdLineArguments>
+          </StartCmdLineArguments>
+          <StartWorkingDirectory>
+          </StartWorkingDirectory>
+          <EnableENC>False</EnableENC>
+          <AlwaysStartWebServerOnDebug>False</AlwaysStartWebServerOnDebug>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
+</Project>

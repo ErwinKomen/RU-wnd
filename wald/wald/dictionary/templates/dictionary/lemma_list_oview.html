@@ -1,0 +1,110 @@
+﻿
+    {% if object_list %}
+      <h3>Overzicht</h3>
+      <div class="row">
+          <div class="col-sm-3"><span>Gevonden: </span><span>{{entrycount}}</span></div>
+          <div class="col-sm-9">
+          <span class="step-links pull-right">
+
+          {% if method == "ajax" %}
+            {% include 'dictionary/pagination_post.html' with method=method %}
+          {% else %}
+            {% include 'dictionary/pagination.html' with method=method %}
+          {% endif %}
+
+          </span>
+          </div>
+      </div>
+      <table class="table table-hover">
+        <thead><tr><th class="hidden">id</th><th>Begrip</th><th>Trefwoord: dialectopgave (plaats)</th><th>Bronnen</th></tr></thead>
+        <tbody>
+          {% for item in qlist %}
+            {% if item.lemma_gloss.first %}
+              <tr class="dict-entry">
+                <td class="hidden"> {{ item.entry.lemma.id }} </td>
+                <td><span class="lemma-list-name">{{item.entry.lemma.gloss}}</span></td>
+                <td>
+            {% endif %}
+            {% if item.trefwoord_woord.first %}
+              <span class="lemma-trefwoord"><a href="{% url 'trefwoordsearch' %}?search={{item.entry.trefwoord.woord|urlencode}}">{{item.entry.trefwoord.woord}}</a>:</span>
+            {% endif %}
+            {% spaceless %}
+              {% if not order_word_toel and item.toelichting.first and item.entry.toelichting != "" %}<span class="lemma-word-toelichting">{{item.entry.toelichting}}</span>&nbsp;{% endif %}
+              {% if item.dialectopgave.first  %}
+                <span class="lemma-word {% if order_word_toel and item.entry.toelichting != "" %}lemma-word-has-toelichting{% endif %}" 
+                  {% if order_word_toel and item.entry.toelichting != "" %}title="{{item.entry.toelichting}}"{% endif %}
+                  >{{item.entry.dialectopgave}}</span>
+                <span> (</span>
+              {% endif %}
+              {% if entry.dialect.nieuw != "Q000" %}
+              <span class="lemma-word-dialect{% if not item.dialectopgave.first %}-additional hidden{% endif %}">
+                <span class="lemma-word-dialect-code hidden">{{item.entry.dialect.nieuw}}</span>
+                <span class="lemma-word-dialect-space hidden">&nbsp;</span>
+                <span class="lemma-word-dialect-stad">{{item.entry.dialect.stad}}</span>
+                {% if item.entry.kloeketoelichting != "" %}&nbsp;<span class="word-kloeketoelichting">[{{item.entry.kloeketoelichting}}]</span>{% endif %}
+                <span>{% if not item.dialectopgave.last %}, {% endif %}</span>
+                {% if item.dialectopgave.first and not item.dialectopgave.last %}
+                  <span class="lemma-word-dialect-dots">...</span>
+                {% endif %}
+              </span>
+              {% endif %}
+              {% if item.entry.mijnlijst.count > 0 %}
+                <span class="word-mijn">{% if  item.entry.dialect.nieuw != "Q000"  %}&nbsp;{% endif %}[</span>
+                {% for mijn in item.entry.mijnlijst.all %}
+                  <span class="word-mijn">{{mijn.naam}}</span>
+                  <span class="word-mijn-letop">{% if not forloop.last %}, {% endif %}</span>
+                {% endfor %}
+                <span class="word-mijn">]</span>
+              {% endif %}
+              {% if item.dialectopgave.last %}
+                <span>)</span>
+              {% endif %}
+              {% if item.dialectopgave.last and not item.lemma_gloss.last %}<span>, </span>{% endif %}
+            {% endspaceless %}
+            {% if item.lemma_gloss.last %}
+                </td>
+                <td>
+                  <!-- Treat the list of lemma-descriptions (toelichtingen) and sources (bronnen) for this lemma -->
+                  {% spaceless %}
+
+                  {% for item_descr in item.dlist %}
+                    {% if item_descr.descr.first %}<span class="toelichting">{{item_descr.entry.toelichting}}</span>{% endif %}
+                    {% if item_descr.entry.bronnenlijst %}<span class="lemma-bronnen"> [{{item_descr.entry.bronnenlijst}}]</span>{% endif %}
+                    {% if not forloop.last and item_descr.entry.toelichting %}
+                      {% if not item_descr.descr.last and item_descr.entry.bronnenlijst  %}<span>, </span>{% endif %}
+                      {% if item_descr.descr.last %}<span> || </span>{% endif %}
+                    {% endif %}
+                  {% endfor %}
+
+                  {% endspaceless %}
+                  <!-- Treat the afleveringen for this lemma -->
+                  {% spaceless %}
+                  {% for item_afl in item.alist %}
+                    {% if item_afl.afl.first %}
+                      <span class="lemma-aflevering"><a href="/{{app_prefix}}static/dictionary/content/pdf/{{item_afl.entry.aflevering.get_pdf}}">{{item_afl.entry.aflevering.get_summary}}</a></span>
+                    {% endif %}
+                    {% if item_afl.afl.last and not forloop.last %}<span>, </span>{% endif %}
+                  {% endfor %}
+                  {% endspaceless %}
+                </td>
+              </tr>
+            {% endif %}
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>No lemma's are available.</p>
+    {% endif %}
+
+      <div class="pagination">
+          <span class="step-links">
+
+          {% if method == "ajax" %}
+            {% include 'dictionary/pagination_post.html' with method=method %}
+          {% else %}
+            {% include 'dictionary/pagination.html' with method=method %}
+          {% endif %}
+
+
+          </span>
+      </div>

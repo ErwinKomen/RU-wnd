@@ -1,0 +1,48 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="googlebot" content="noindex, nofollow">
+    <title>{{ title }}</title>
+    {% load staticfiles %}
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'dictionary/content/bootstrap.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'dictionary/content/fontawesome-5-all.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'dictionary/content/site.css' %}" />
+    <script src="{% static 'dictionary/scripts/modernizr-2.6.2.js' %}"></script>
+    <script src="{% static 'dictionary/scripts/jquery-1.10.2.js' %}"></script>
+    <script src="{% static 'dictionary/scripts/bootstrap.js' %}"></script>
+    <script src="{% static 'dictionary/scripts/respond.js' %}"></script>
+    <script src="{% static 'dictionary/scripts/diadict.js' %}"></script>
+</head>
+
+<body>
+    {% include 'dictionary/topnav.html' %}
+
+    <div name="layout"></div>
+
+    <div class="container body-content">
+{% block content %}{% endblock %}
+        <hr/>
+    </div>
+
+  <div>
+        <footer>
+            <span>e-WGD v1.0.0 &copy; 2019-{% now "Y" %} </span>
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            <span>Developed at: <a href="https://www.ru.nl/facultyofarts/research/humanities-lab/our-labs/">Radboud University Nijmegen, Humanities Lab, TSG</a></span>
+        </footer>
+
+  </div>
+
+{% block scripts %}{% endblock %}
+
+  <script>
+    // Make sure events are connect on the right places
+    init_events();
+  </script>
+
+</body>
+</html>

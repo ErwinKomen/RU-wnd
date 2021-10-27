@@ -1,0 +1,74 @@
+{% extends "dictionary/layout.html" %}
+{% load staticfiles %}
+
+
+{% block content %}
+
+<div class="row">
+
+
+  <div class="col-md-7">
+    <h3>Bewerking en digitalisering</h3>
+
+    <p>In augustus 2013 vond de eerste bespreking plaats tussen de stuurgroep Digitalisering Dialectwoordenboeken en 
+    Lex Schaars en Dirk Jan Eertink over de digitalisering van het WALD. Een complicerende factor was dat van de tussen 
+    1984 en 2004 gepubliceerde delen geen bruikbare digitale versie bestond en we met gescande versies moesten werken. 
+    Na de met OCR bewerkte scans met een programma van een structuur te hebben voorzien waarbij meteen veel voorkomende 
+    OCR-fouten zijn hersteld, moest alles nog wel 'met de hand' worden nagekeken; dit is gedaan door Kee van Tuinen. 
+    Omdat in het WALD geen gestandaardiseerde vormen (trefwoorden) staan, zijn die alsnog toegevoegd. Voor de hier 
+    gepubliceerde delen is dat gedaan door Gregory Metallinos.</p>
+    <p>
+      In de toekomst zullen de inmiddels verschenen delen als ook de nog te verschijnen delen in het eWALD opgenomen worden. 
+    </p>
+
+    <h3>Dialectgebieden</h3>
+    <p>Het kaartje omvat het onderzoeksgebied van het WALD.
+      Hoewel de Oude IJssel wel als geografische grens tussen de Liemers en de Achterhoek wordt beschouwd, 
+    heeft die in dialectologisch opzicht geen betekenis: er ligt ten noorden en zuiden van de Oude IJssel een 
+    breed overgangsgebied tussen het Nedersaksisch in de Achterhoek en het Nederfrankisch in het zuiden van de Liemers.</p>
+
+    <h3>Plaatsen</h3>
+    <p>De 75 plaatsen in Achterhoek en Liemers waar materiaal is verzameld staan in het kaartje met de plaatsen en hun plaatsnamen.
+     In een groot aantal gevallen is ook materiaal uit aangrenzend gebied opgenomen. 
+    Dat is gedaan om te laten zien wat er over de grens gebeurt. Woorden trekken zich van regio-, provincie- en rijksgrenzen veelal weinig aan. 
+    Van onderzoek dat zich binnen die grenzen beperkt, gaat de suggestie uit dat het onderzochte gebied een eenheid vormt. 
+    De taal van Winterswijk heeft veel verwantschap met die van Vreden in Westfalen; de taal van Lobith met die van Millingen. 
+    Gorssels en Wilps lijken op elkaar evenals het dialect van Gelselaar en Markelo.</p>
+
+    <h3>Techniek</h3>
+    <p>De e-WALD-applicatie is ontwikkeld door Erwin Komen van de Technical Support Group van het Humanities Lab 
+    van de Radboud Universiteit onder supervisie van Henk van den Heuvel, 
+    waarbij Dirk Jan Eertink het WALD-materiaal digitaal geschikt gemaakt heeft voor het e-WALD. 
+    Thijs Hermsen heeft de kaarten gemaakt.</p>
+  </div>
+  <div class="col-md-5" align="right">
+    <div class="row">
+      <a target="_blank" href="{% static 'dictionary/content/dialectkaart-wald.jpg' %}">
+        <img src="{% static 'dictionary/content/dialectkaart-wald.jpg' %}" 
+             alt="Een indeling van de Achterhoekse en Liemertse dialecten" 
+             title="Een indeling van de Achterhoekse en Liemertse dialecten" 
+             style="height:380px;z-index:-2" >
+      </a>
+    </div>
+    <div class="row">
+      <span class="bronvermelding pull-right">
+          &copy;&nbsp;Hermsen, T (2020).
+      </span>
+    </div>
+    <div class="row">
+      <a target="_blank" href="{% static 'dictionary/content/taalkaart-wald_vindplaatsen-groot.jpg' %}">
+        <img src="{% static 'dictionary/content/taalkaart-wald_vindplaatsen.jpg' %}" 
+             alt="Vindplaatsen van de Achterhoekse en Liemertse dialecten" 
+             title="Vindplaatsen van de Achterhoekse en Liemertse dialecten" 
+             style="height:380px;z-index:-2" >
+      </a>
+    </div>
+    <div class="row">
+      <span class="bronvermelding pull-right">
+          &copy;&nbsp;Hermsen, T (2020).
+      </span>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

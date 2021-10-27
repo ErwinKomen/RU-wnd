@@ -1,0 +1,81 @@
+{% extends "dictionary/layout.html" %}
+{% load staticfiles %}
+
+
+{% block content %}
+
+<div class="row">
+
+
+  <div class="col-md-7">
+    <h3>Bewerking en digitalisering</h3>
+
+    <p>In 2015 zijn de eerste twee delen van het Woordenboek van de Brabantse Dialecten gedigitaliseerd 
+      dankzij een subsidie die CLARIN heeft toegekend voor het project ‘CARE: CuRatie en integratie 
+      REgionale woordenboeken’ onder leiding van Nicoline van der Sijs, Henk van den Heuvel en Roeland van Hout (RU).
+    </p>
+
+    <p>Eric Sanders (RU) heeft een macro en script ontworpen voor de semi-automatische digitalisering.
+    Onderzoeksassistent Aukje Borkent, projectmedewerkster datacuratie Linda van Meel
+    (mede dankzij de leerstoel Diversiteit in Taal en Cultuur in Brabant, Universiteit van Tilburg), 
+      student-assistenten Jorik van Engeland, Inge Otto, Lisette van der Heijde en Hanna van den Heuvel, 
+      en stagiairs Maaike Borst en Eline Dimmendaal hebben alle teksten door de macro laten lezen en het 
+      resultaat nauwkeurig handmatig gecorrigeerd. 
+    Vrijwilligers Jantien Kettenes-Van den Bosch en 
+      Herman Wiltink hebben voor veel delen een voorcorrectie uitgevoerd.
+    </p>
+
+    <p>Joep Kruijsen, een van de oorspronkelijke redacteuren, heeft zijn enorme knowhow ter beschikking 
+      gesteld voor de digitalisering en veel correctiewerkzaamheden uitgevoerd; zo heeft hij onder 
+      andere alle fonetische tekens uit deel I en II gecorrigeerd; 
+    die correcties worden de komende tijd geleidelijk toegevoegd aan de huidige applicatie. 
+    </p>
+
+
+  </div>
+  <div class="col-md-5" align="center">
+    <div class="row">&nbsp;</div>
+    <div class="row">
+      <a target="_blank" href="{% static 'dictionary/content/taalkaart-ewbd.jpg' %}">
+        <img src="{% static 'dictionary/content/taalkaart-ewbd.jpg' %}" 
+             alt="Een indeling van de Brabantse dialecten" 
+             title="Een indeling van de Brabantse dialecten
+(Noord-Brabant, Antwerpen, Vlaams-Brabant, Brussel)" 
+             style="height:380px;z-index:-2" >
+      </a>
+    </div>
+    <div class="row">
+      <span class="bronvermelding pull-right">
+          &copy;&nbsp;Hermsen, T (2017-2018).
+      </span>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-12">
+    <h3>Overzichtskaart onderzoeksgebied</h3>
+    <p>Het kaartje op de hoofdpagina omvat het onderzoeksgebied van het WBD. 
+    Het kaartje op de hoofdpagina omvat het onderzoeksgebied van het WBD. 
+    Het gebied omvat de Nederlandse provincie Noord-Brabant, aan de bovenkant. 
+    Dan zakken we af naar het Gewest Vlaanderen in België. 
+    Allereerst komen we in de provincie Antwerpen en vervolgens in de provincie Vlaams-Brabant. 
+    In Vlaams-Brabant is nog een afgesloten gebied aangegeven en dat is het Brussels Hoofdstedelijk Gewest. 
+    Het Brussels is van oorsprong een Brabants dialect.</p>
+    <h3>Indeling Brabantse dialecten</h3>
+    <p>Hiernaast staat een dialectkaart waarop de Brabantse dialectgebieden zijn aangegeven.
+     Deze gebieden zijn gebruikt bij het aanduiden van gebieden in het WBD. 
+    Een toelichting op deze indeling is te vinden in WBD Inleiding op deel III: R. Belemans, J. Goossens, 
+    <i>Inleiding en klankgeografie van de Brabantse dialecten</i>, Assen 2000 (232p.). 
+    Bij die aflevering zat een doorzichtige kaart  die op de gedrukte kaarten kon worden gelegd. 
+    De doorzichtige kaart is omgezet in de dialectkaart hiernaast, waarin ter oriëntatie de grotere plaatsen zijn aangegeven. 
+    De grotere dialectgebieden zijn afgegrensd met lijnen. 
+    De verdere indeling is met kleur aangegeven.</p>
+
+    <h3>Techniek</h3>
+    <p>De e-WBD-applicatie is ontwikkeld door Erwin Komen van de Technical Support Group van het Humanities Lab 
+    van de Radboud Universiteit onder supervisie van Henk van den Heuvel. </p>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "dictionary/layout.html" %}
+
+{% load static %}
+
+{% block content %}
+
+<div name="index"></div>
+
+
+<div class="jumbotron">
+    <h2>Elektronisch Woordenboek van de Achterhoekse en Liemerse Dialecten</h2>
+    <p class="lead">(e-WALD)</p> 
+
+</div>
+
+<div class="row">
+    <div class="col-md-7">
+      <p>
+        Het e-WALD bevat tot nu toe de inhoud van de eerste vijf tussen 1984 en 1996 verschenen delen van het
+        <em>Woordenboek van de Achterhoekse en Liemerse dialecten</em> die in druk 
+        in 11 afleveringen zijn verschenen tussen 1984 en 2018 (zie tabblad Overzichten, het zijn de delen  I.1, I.2, II.1, V.1 en V.2). 
+      In het e-WALD kunnen geïnteresseerden de <b>dialecttrefwoorden</b> opzoeken voor bepaalde <b>begrippen</b>, 
+        zoals ‘tafel’ of ‘groeien’. Daarbij worden ook de verschillende fonetische varianten, 
+        de zogenoemde <b>dialectopgaven</b>, van de trefwoorden getoond.</p>
+
+    <p>Het is ook mogelijk alle trefwoorden van één bepaalde <b>plaats uit Achterhoek of Liemers </b> op te zoeken, 
+      hetzij door te zoeken op de plaatsnaam, hetzij door te zoeken op de <b>Kloekecode</b> van de bewuste plaatsnaam. 
+      De <a href="http://www.meertens.knaw.nl/kloeke/">Kloekecodes</a> zijn unieke nummeringen die 
+      de dialectoloog G.G. Kloeke in 1926 heeft toegekend aan de plaatsen 
+      en gehuchten in Nederland, Vlaanderen, Frans-Vlaanderen en het noordwesten van Duitsland. 
+      Ze bestaan uit een hoofdletter gevolgd door drie cijfers met soms een kleine letter daaraan toegevoegd. 
+      Omdat de oorspronkelijke nummering in de loop van de tijd is uitgebreid, bestaan er een naast de oude 
+      Kloekecodes ook nieuwe Kloekecodes; in de zoekapplicatie worden beide versies getoond.</p>
+
+    <p>Deze eerste vijf delen van het e-WALD bevatten ca. 2.160 begrippen, 11.260 trefwoorden en 17.400 dialectopgaven, 
+      verzameld in 60 plaatsen uit de Achterhoek en Liemers en uit 8 subregio's van deze gebieden; 
+      verder in beperkte mate uit 12 plaatsen in Westfalen, uit 3 plaatsen in Overijssel, 
+      uit 4 plaatsen uit overige Gelderland; iedere plaats of subregio vertegenwoordigt een eigen dialect 
+      (de delen 1 t/m 11 bevatten samen ca. 5.000 begrippen, 17.000 trefwoorden en 38.000 dialectwoorden).</p>
+
+    <p>De website met e-WALD is op 11 december 2020 digitaal en feestelijk gelanceerd tijdens een webinar. 
+      De website vormt een aanvulling op de websites 
+      <a href="https://e-wld.nl/">e-WLD</a> met de <em>Limburgse dialecten</em>
+      en <a href="https://e-wbd.nl/">e-WBD</a> met de <em>Brabantse dialecten</em>.
+      De <a href="https://e-wgd.nl">e-WGD</a> is in ontwikkeling en wordt in 2021 gelanceerd.
+      Het omvat de <em>Gelderse dialecten</em> van de Rivierenstreek en de Betuwe.
+
+      </p>
+  </div>
+  <div class="col-md-5">
+    <a target="_blank" href="{% static 'dictionary/content/taalkaart-wald.jpg' %}">
+    <img src="{% static 'dictionary/content/taalkaart-wald.jpg' %}" 
+         alt="Hoofdgebieden van de Achterhoekse en Liemerse dialecten" 
+         title="Hoofdgebieden van de Achterhoekse en Liemerse dialecten" 
+         style="float:right;width:480px;" ></a>
+  </div>
+</div>
+
+
+{% endblock %}

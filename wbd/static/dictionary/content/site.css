@@ -1,0 +1,352 @@
+body {
+    padding-top: 50px;
+    padding-bottom: 20px;
+}
+
+/* Set padding to keep content from hitting the edges */
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* Set width on the form input elements since they're 100% wide by default */
+input,
+select,
+textarea {
+    /* max-width: 280px; */
+}
+
+/* styles for validation helpers */
+.field-validation-error {
+    color: #b94a48;
+}
+
+.field-validation-valid {
+    display: none;
+}
+
+input.input-validation-error {
+    border: 1px solid #b94a48;
+}
+
+input[type="checkbox"].input-validation-error {
+    border: 0 none;
+}
+
+.validation-summary-errors {
+    color: #b94a48;
+}
+
+.validation-summary-valid {
+    display: none;
+}
+
+/* My own modifications */
+a.list-group-item-info:hover {
+  background-color: lightyellow !important;
+}
+table tbody tr:hover {
+  background-color: lightyellow !important;
+}
+
+/* wbd modifications */
+.dict-entry {
+
+}
+.dict-entry .entry-word {
+  color: blue;
+  font-weight: bold;
+}
+.dict-entry .lemma-name {
+
+}
+.dict-entry .lemma-bronnen {
+
+}
+.dict-entry .toelichting {
+  /% font-style: italic;*/
+}
+.dict-entry .trefwoord {
+
+}
+.dict-entry .kloeke-code {
+  font-variant-caps: small-caps;
+}
+.dict-entry .kloeke-stad {
+
+}
+
+.lemma-trefwoord {
+  color: darkblue;
+  font-weight: bold;
+}
+
+.lemma-word-dialect {
+}
+
+.lemma-word-toelichting, .trefwoord-word-toelichting {
+    background-color: lightyellow;
+    /* font-size: smaller; */
+}
+.lemma-word-has-toelichting:hover {
+    background-color: yellow;
+}
+.word-kloeketoelichting {
+  background-color: lightblue;
+  font-size: smaller;
+}
+
+.lemma-word-dialect-code {
+  font-variant-caps: small-caps;
+  color: green;
+}
+
+.lemma-word-dialect-stad {
+  color: saddlebrown;
+}
+
+.word-mijn {
+  font-size: smaller;
+  color: darkslategrey;
+}
+
+.lemma-bronnen {
+  font-variant-caps: small-caps;
+  color: darkolivegreen;
+}
+
+.lemma-list-name {
+  text-transform: lowercase;
+  font-weight: bold;
+}
+
+.lemma-name {
+  text-transform: lowercase;
+  font-weight: bold;
+}
+
+.lemma-name > a {
+  text-transform: lowercase;
+  font-weight: bold;
+  color: darkblue !important;
+}
+
+.trefwoord-name {
+  text-transform: lowercase;
+  font-weight: bold;
+}
+
+.citation-intro {
+  
+}
+.citation-number {
+
+}
+.citation-author {
+  color: darkblue;
+}
+.citation-title-sectietitel {
+  color: darkred;
+}
+.citation-title-afltitel {
+  color: darkcyan
+}
+.citation-publication {
+
+}
+
+.bronvermelding-intro {
+  font-size: xx-small;
+}
+
+.bronvermelding {
+  font-size: xx-small;
+  color: darkgreen;
+  /* display: none; */
+}
+.bronvermelding-intro:hover + .bronvermelding {
+  font-size: xx-small;
+  color: darkgreen;
+  display: block;
+  width: auto;
+  height: auto;
+}
+.bronvermelding-details {
+  font-size: xx-small;
+  color: darkgreen;
+}
+
+
+.pagination {
+  margin: 5px 0;
+}
+.submit-row a.deletelink {
+  height: 35px;
+}
+
+
+/* navbar */
+.navbar-custom {
+    background-color: green !important;
+    border-color: darkgreen !important;
+}
+/* title */
+.navbar-custom .navbar-brand {
+    color: lightgreen !important;
+}
+.navbar-custom .navbar-brand:hover,
+.navbar-custom .navbar-brand:focus {
+    color: sandybrown;
+}
+/* link */
+.navbar-custom .navbar-nav > li > a {
+    color: white;
+}
+.navbar-custom .navbar-nav > li > a:hover,
+.navbar-custom .navbar-nav > li > a:focus {
+    color: lightgreen !important;
+    background-color: darkgreen !important;
+}
+.navbar-custom .navbar-nav > .active > a, 
+.navbar-custom .navbar-nav > .active > a:hover, 
+.navbar-custom .navbar-nav > .active > a:focus {
+    color: lightgreen;
+    background-color: darkgreen;
+}
+.navbar-custom .navbar-nav > .open > a, 
+.navbar-custom .navbar-nav > .open > a:hover, 
+.navbar-custom .navbar-nav > .open > a:focus {
+    color: #ffe6d1;
+    background-color: #D5D5D5;
+}
+/* caret */
+.navbar-custom .navbar-nav > .dropdown > a .caret {
+    border-top-color: #ecf0f1;
+    border-bottom-color: #ecf0f1;
+}
+.navbar-custom .navbar-nav > .dropdown > a:hover .caret,
+.navbar-custom .navbar-nav > .dropdown > a:focus .caret {
+    border-top-color: #ffe6d1;
+    border-bottom-color: #ffe6d1;
+}
+.navbar-custom > .navbar-nav > .dropdown > .dropdown-menu > li > a,
+.navbar-custom > .navbar-nav > .dropdown > .dropdown-menu > li > a:link,
+.navbar-custom > .navbar-nav > .dropdown > .dropdown-menu > li > a:visited {
+  color: black !important;
+}
+
+.navbar-custom .navbar-nav > .open > a .caret, 
+.navbar-custom .navbar-nav > .open > a:hover .caret, 
+.navbar-custom .navbar-nav > .open > a:focus .caret {
+    border-top-color: #ffe6d1 !important;
+    border-bottom-color: #ffe6d1 !important;
+}
+/* mobile version */
+.navbar-custom .navbar-toggle {
+    border-color: #d35400 !important;
+}
+.navbar-custom .navbar-toggle:hover,
+.navbar-custom .navbar-toggle:focus {
+    background-color: #d35400 !important;
+}
+.navbar-custom .navbar-toggle .icon-bar {
+    background-color: #ecf0f1 !important;
+}
+@media (max-width: 767px) {
+    .navbar-custom .navbar-nav .open .dropdown-menu > li > a {
+        color: #ecf0f1 !important;
+    }
+    .navbar-custom .navbar-nav .open .dropdown-menu > li > a:hover,
+    .navbar-custom .navbar-nav .open .dropdown-menu > li > a:focus {
+        color: #ffe6d1 !important;
+        background-color: #d35400 !important;
+    }
+}
+
+#header  .navbar-custom  .open .dropdown-menu li  a:link,
+#header  .navbar-custom  .open .dropdown-menu li  a:visited {
+  color: black !important;
+}
+
+/* Nieuw toegevoegd voor e-WBD en ook gebruikt door e-WLD */
+.filter-summary {
+  font-family: monospace, serif;
+  color: darkblue;
+}
+.filter-item {
+  background-color: lightgray;
+  border-radius: 3px 4px;
+  margin: 2px 2px 2px 2px;
+}
+.filter-item:hover {
+  background-color: lightyellow;
+  color: darkred;
+  border-radius: 3px 4px;
+  margin: 2px 2px 2px 2px;
+}
+
+.glyphicon-refresh-animate {
+    animation: spin .7s infinite linear;
+    -webkit-animation: spin2 .7s infinite linear;
+}
+
+
+@-webkit-keyframes spin2 {
+    from { -webkit-transform: rotate(0deg);}
+    to { -webkit-transform: rotate(360deg);}
+}
+
+@keyframes spin {
+    from { transform: scale(1) rotate(0deg);}
+    to { transform: scale(1) rotate(360deg);}
+}
+
+/* Starting from e-WGD: better footer representation */
+body > div > footer {
+  height: 18px;
+  padding-top: 4px;
+  background: darkgreen;
+  color: white;
+  font-size: x-small;
+  position: fixed;
+  bottom: 0px;
+  width: 100%;
+  text-align: center;
+}
+body > div > footer a {
+  color: lightgreen;
+  position: relative;
+  z-index: 1000;
+}
+
+.modal-content {
+    /* background-color: whitesmoke; */
+}
+
+/* Leaflet stuff */
+section.leaflet-control-layers-list {
+    max-height: 300px;
+}
+
+input[type="checkbox"].leaflet-control-layers-selector {
+    display: none;
+}
+input[type="checkbox"].leaflet-control-layers-selector:not(:checked) + span {
+    background-color: lightgray !important;
+}
+
+.leaflet-popup-tip,                                                                                                                     
+.leaflet-popup-content-wrapper {                                                                                                        
+    text-align:center;                                                                                                                  
+    padding:6px;                                                                                                                        
+}                                                                                                                                       
+                                                                                                                                        
+.leaflet-popup-content, .leaflet-popup-content > hr {                                                                                                                
+    margin:0px;                                                                                                                         
+    padding:0px;                                                                                                                        
+}                                                                                                                                       
+                                                                                                                                        
+.leaflet-popup-content p {                                                                                                              
+    margin:0px;                                                                                                                         
+    padding:0px;                                                                                                                        
+}  

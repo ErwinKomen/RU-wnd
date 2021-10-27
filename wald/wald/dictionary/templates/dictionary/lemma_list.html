@@ -1,0 +1,257 @@
+{% extends "dictionary/layout.html" %}
+
+{% block content %}
+
+    <div class="panel panel-default">
+      <form name='lemmasearch' id='lemmasearch' action="" method='get' >
+        {% if method == 'ajax' %} {% csrf_token %} {% endif %}
+          <!-- EK: A sort-order specification is in a hidden form field, which is filled by JS:do_sort_column() -->
+          <div class="hidden">
+              <input name='sortOrder' class='form-control' value='gloss' >
+              <input name='search_type' class='form-control' value='lemma'>
+              <input id="submit_type" name='submit_type' class='form-control' value='simple'>
+          </div>
+
+          {% include 'dictionary/dialectviewing.html' %}
+
+          <!-- The top layer of searching -->
+          <div class="row"><table><tr><td>&nbsp;</td></tr></table></div>
+
+
+          <div id="searchdefault" class="row">
+            <div class="col-sm-4">
+              <label>&nbsp;</label>
+              <div class='input-group'>
+                <label class='input-group-addon' 
+                        data-toggle="popover" data-trigger="hover"
+                        data-placement="right" data-content="Willekeurige tekens: ? (één) * (0 of meer). Groep tekens: [m-n]"
+                        for='id_entry'>{{searchform.search.label}}</label>
+                <input name='search' class='form-control search-input' 
+                       {% if searchform.search.value %}value='{{searchform.search.value}}'{% endif %}>
+              </div>
+            </div>
+            <div class="col-sm-4 col-sm-offset-2">
+              <div><label>&nbsp;</label></div>
+              <div class='btn-group'>
+                  <!-- Make sure no button has the *name* 'submit', otherwise submit() cannot be used -->
+                  <button type="button" class="btn btn-primary" id="button_search" m="{{method}}" onclick="do_search(this, 'lemma', 'simple');">Zoek</button>
+                  <button type="button" class="btn btn-default" id="button_herstel" m="{{method}}" onclick="do_search(this, 'lemma', 'Herstel');">Herstel</button>
+                  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" 
+                      aria-haspopup="true" aria-expanded="false">Download <span class="caret"></span></button>
+                  <ul class="dropdown-menu">
+                    <li><a href="#" onclick="do_search(this, 'lemma', 'Csv');" >Tab gescheiden lijst</a></li>
+                    <li><a href="#" onclick="do_search(this, 'lemma', 'Excel');" >Excel</a></li>
+                    <li><a href="#" onclick="do_search(this, 'lemma', 'Html');" >Html</a></li>
+                  </ul>
+              </div>
+            </div>
+            <div class="col-sm-2">
+              <div class='form-group' id='paginate_by'>
+                <label for='paginate_by'>Per pagina</label>
+                <select class='form-control' name="paginate_by">
+                  {% for pag in paginateValues %}
+                  <option {% if pag == paginateSize %} selected {% endif %}>{{pag}}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Collapsable area for fine-tuning -->
+          <div class="row"><table><tr><td>&nbsp;</td></tr></table></div>
+          <div class="panel panel-default">
+
+            <div class="panel-heading" data-toggle="collapse" data-target="#query-area">
+              <span>Filteren...</span>
+              <span class="filter-summary">
+                <span class="filter-item">{% if searchform.dialectCode.value %}dialect={{searchform.dialectCode.value}}{% endif %}</span>
+                <span class="filter-item">{% if searchform.woord.value %}woord={{searchform.woord.value}}{% endif %}</span>
+                <span class="filter-item">{% if searchform.dialectCity.value %}plaats={{searchform.dialectCity.value}}{% endif %}</span>
+                <span class="filter-item">{% if afl %}aflevering={{afl}}{% endif %}</span>
+                  {% if mijnen|length > 0 %}
+                    <span class="filter-item">{% if mijnnaam %}mijn={{mijnnaam}}{% endif %}</span>
+                  {% endif %}
+              </span>
+            </div>
+
+            <!-- class="collapse" -->
+            <div id="query-area" class="collapse {% if not request.GET.search %} inert {% endif %}">
+
+
+              <div id='searchformwell' class='well search-results-collapsable'>
+
+                  <table class='table'>
+                      <tr>
+                        <td>
+                          <div class='input-group'>
+                            <label class='input-group-addon' for='id_code'>{{searchform.dialectCode.label}}</label>
+                            <input name='dialectCode' class='form-control' {% if searchform.dialectCode.value %}value='{{searchform.dialectCode.value}}'{% endif %}>
+                          </div>
+                          <div><label>&nbsp;</label></div>
+                          <div class='input-group'>
+                              <label class='input-group-addon' 
+                                      data-toggle="popover" data-trigger="hover"
+                                      data-placement="right" data-content="Willekeurige tekens: ? (één) * (0 of meer). Groep tekens: [m-n]"
+                                      for='id_woord'>{{searchform.woord.label}}</label>
+                              <input name='woord' class='form-control' {% if searchform.woord.value %}value='{{searchform.woord.value}}'{% endif %}>
+                          </div>
+                        </td>
+                        <td>
+                          <div class='input-group'>
+                            <label class='input-group-addon' for='id_city'>{{searchform.dialectCity.label}}</label>
+                            <input name='dialectCity' class='form-control' {% if searchform.dialectCity.value %}value='{{searchform.dialectCity.value}}'{% endif %}>
+                          </div>
+                          <div><label>&nbsp;</label></div>
+                          <div class='input-group'>
+                            <label class='input-group-addon' for='aflevering'>{{searchform.aflevering.label}}</label>
+                            <select class='form-control' name="aflevering">
+                                <option value="0">-</option>
+                              {% for opt in afleveringen %}
+                                <option {% if opt.id == aflkeuze %} selected {% endif %} value="{{opt.id}}">{{opt.get_summary}}</option>
+                              {% endfor %}
+                            </select>
+                          </div>
+
+                          {% if mijnen|length > 0 %}
+                            <div><label>&nbsp;</label></div>
+                            <div class='input-group'>
+                              <label class='input-group-addon' for='mijn'>{{searchform.mijn.label}}</label>
+                              <select class='form-control' name="mijn">
+                                  <option value="0">-</option>
+                                {% for opt in mijnen %}
+                                  <option {% if opt.id == mijnkeuze %} selected {% endif %} value="{{opt.id}}">{{opt.naam}}</option>
+                                {% endfor %}
+                              </select>
+                            </div>
+                          {% endif %}
+                        </td>
+                      </tr>
+
+                  </table>
+
+            </div>
+          </div>
+          </div>
+      </form>
+    </div>
+
+    <!-- Make sure the modal form is loaded -->
+    {% include 'mapview/map_view.html' %}
+
+    <div id="lemma_list_msg"><!-- Room for any error messages --></div>
+    <div id="lemma_list_oview">
+    {% if object_list %}
+      <h3>Overzicht</h3>
+      <div class="row">
+          <div class="col-sm-3"><span>Gevonden: </span><span>{{entrycount}}</span></div>
+          <div class="col-sm-9">
+          <span class="step-links pull-right">
+
+          {% include 'dictionary/pagination.html' %}
+
+          </span>
+          </div>
+      </div>
+      <table class="table table-hover">
+        <thead><tr><th class="hidden">id</th><th>Begrip</th><th>Trefwoord: dialectopgave (plaats)</th><th>Bronnen</th></tr></thead>
+        <tbody>
+          {% for item in qlist %}
+            {% if item.lemma_gloss.first %}
+              <tr class="dict-entry">
+                <td class="hidden"> {{ item.entry.lemma.id }} </td>
+                <td><span class="lemma-list-name">{{item.entry.lemma.gloss}}</span></td>
+                <td>
+            {% endif %}
+            {% if item.trefwoord_woord.first %}
+              <span class="lemma-trefwoord"><a href="{% url 'trefwoordsearch' %}?search={{item.entry.trefwoord.woord|urlencode}}">{{item.entry.trefwoord.woord}}</a>:</span>
+            {% endif %}
+            {% spaceless %}
+              {% if not order_word_toel and item.toelichting.first and item.entry.toelichting != "" %}<span class="lemma-word-toelichting">{{item.entry.toelichting}}</span>&nbsp;{% endif %}
+              {% if item.dialectopgave.first  %}
+                <span class="lemma-word {% if order_word_toel and item.entry.toelichting != "" %}lemma-word-has-toelichting{% endif %}" 
+                  {% if order_word_toel and item.entry.toelichting != "" %}title="{{item.entry.toelichting}}"{% endif %}
+                  >{{item.entry.dialectopgave}}</span>
+                <span> (</span>
+              {% endif %}
+              {% if entry.dialect.nieuw != "Q000" %}
+              <span class="lemma-word-dialect{% if not item.dialectopgave.first %}-additional hidden{% endif %}">
+                <span class="lemma-word-dialect-code hidden">{{item.entry.dialect.nieuw}}</span>
+                <span class="lemma-word-dialect-space hidden">&nbsp;</span>
+                <span class="lemma-word-dialect-stad">{{item.entry.dialect.stad}}</span>
+                {% if item.entry.kloeketoelichting != "" %}&nbsp;<span class="word-kloeketoelichting">[{{item.entry.kloeketoelichting}}]</span>{% endif %}
+                <span>{% if not item.dialectopgave.last %}, {% endif %}</span>
+                {% if item.dialectopgave.first and not item.dialectopgave.last %}
+                  <span class="lemma-word-dialect-dots">...</span>
+                {% endif %}
+              </span>
+              {% endif %}
+              {% if item.entry.mijnlijst.count > 0 %}
+                <span class="word-mijn">{% if  item.entry.dialect.nieuw != "Q000"  %}&nbsp;{% endif %}[</span>
+                {% for mijn in item.entry.mijnlijst.all %}
+                  <span class="word-mijn">{{mijn.naam}}</span>
+                  <span class="word-mijn-letop">{% if not forloop.last %}, {% endif %}</span>
+                {% endfor %}
+                <span class="word-mijn">]</span>
+              {% endif %}
+              {% if item.dialectopgave.last %}
+                <span>)</span>
+              {% endif %}
+              {% if item.dialectopgave.last and not item.lemma_gloss.last %}<span>, </span>{% endif %}
+            {% endspaceless %}
+            {% if item.lemma_gloss.last %}
+                </td>
+                <td>
+                  <!-- Treat the list of lemma-descriptions (toelichtingen) and sources (bronnen) for this lemma -->
+                  {% spaceless %}
+
+                  <a role="button" class="btn btn-xs" title="Toon trefwoorden op kaart"
+                     onclick="ru.mapview.lemma_map(this);"
+                     targeturl="{% url 'lemmamap' item.entry.lemma.id %}" targetid="" >
+                    <i class="far fa-map" style="color: brown;"></i>
+                  </a>
+
+                  {% for item_descr in item.dlist %}
+                    {% if item_descr.descr.first %}<span class="toelichting">{{item_descr.entry.toelichting}}</span>{% endif %}
+                    {% if item_descr.entry.bronnenlijst %}<span class="lemma-bronnen"> [{{item_descr.entry.bronnenlijst}}]</span>{% endif %}
+                    {% if not forloop.last and item_descr.entry.toelichting %}
+                      {% if not item_descr.descr.last and item_descr.entry.bronnenlijst  %}<span>, </span>{% endif %}
+                      {% if item_descr.descr.last %}<span> || </span>{% endif %}
+                    {% endif %}
+                  {% endfor %}
+
+                  {% endspaceless %}
+                  <!-- Treat the afleveringen for this lemma -->
+                  {% spaceless %}
+                  {% for item_afl in item.alist %}
+                    {% if item_afl.afl.first %}
+                      {% if item_afl.entry.aflevering.naam == "-" %}
+                        <span class="lemma-aflevering">{{item_afl.entry.aflevering.get_summary}}</span>
+                      {% else %}
+                        <span class="lemma-aflevering"><a href="/{{app_prefix}}static/dictionary/content/pdf/{{item_afl.entry.aflevering.get_pdf}}">{{item_afl.entry.aflevering.get_summary}}</a></span>
+                      {% endif %}
+                    {% endif %}
+                    {% if item_afl.afl.last and not forloop.last %}<span>, </span>{% endif %}
+                  {% endfor %}
+                  {% endspaceless %}
+                </td>
+              </tr>
+            {% endif %}
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>No lemma's are available.</p>
+    {% endif %}
+
+      <div class="pagination">
+          <span class="step-links">
+
+          {% include 'dictionary/pagination.html' %}
+
+          </span>
+      </div>
+    </div>
+
+
+{% endblock content %}
+

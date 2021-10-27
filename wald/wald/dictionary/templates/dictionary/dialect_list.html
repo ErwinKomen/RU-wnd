@@ -1,0 +1,118 @@
+{% extends "dictionary/layout.html" %}
+
+{% block content %}
+
+      <div class="panel panel-default">
+        <form name='dialectsearch' id='dialectsearch' action="" method='get' onsubmit="return do_search('#id_submit_button', 'dialect', 'simple');" >
+            <!-- EK: A sort-order specification is in a hidden form field, which is filled by JS:do_sort_column() -->
+            <div class="hidden">
+                <input name='sortOrder' class='form-control' value='stad' >
+                <input name='search_type' class='form-control' value='stad'>
+                <input id="submit_type" name='submit_type' class='form-control' value='simple'>
+            </div>
+
+            <!-- The top layer of searching -->
+            <div class="row"><table><tr><td>&nbsp;</td></tr></table></div>
+
+
+            <div id="searchdefault" class="row">
+              <div class="col-sm-3">
+                <label>&nbsp;</label>
+                <div class='input-group'>
+                    <label class='input-group-addon' 
+                           data-toggle="popover" data-trigger="hover"
+                           data-placement="right" data-content="Willekeurige tekens: ? (één) * (0 of meer). Groep tekens: [m-n]"
+                           for='id_entry'>{{searchform.search.label}}</label>
+                    <input name='search' class='form-control' {% if searchform.search.value %}value='{{searchform.search.value}}'{% endif %}>
+                </div>
+              </div>
+              <div class="col-sm-3">
+                <label>&nbsp;</label>
+                <div class='input-group'>
+                    <label class='input-group-addon' 
+                           data-toggle="popover" data-trigger="hover"
+                           data-placement="right" data-content="Willekeurige tekens: ? (één) * (0 of meer). Groep tekens: [m-n]"
+                           for='id_woord'>{{searchform.nieuw.label}}</label>
+                    <input name='nieuw' class='form-control' {% if searchform.nieuw.value %}value='{{searchform.nieuw.value}}'{% endif %}>
+                </div>
+              </div>
+              <div class="col-sm-3">
+                <div><label>&nbsp;</label></div>
+                <div class='btn-group'>
+                    <!-- Make sure no button has the *name* 'submit', otherwise submit() cannot be used -->
+                    <input class='btn btn-primary' type="submit" onclick="do_search(this, 'dialect', 'simple');" name="submit_type" value="Zoek">
+                    <input class='btn btn-default' type="submit" onclick="do_search(this, 'dialect', 'Herstel');" name="submit_type" value="Herstel">
+                </div>
+              </div>
+              <div class="col-sm-3">
+                <div class='form-group pull-right' id='paginate_by'>
+                  <label for='paginate_by'>Per pagina</label>
+                  <div>
+                    <select class='form-control' name="paginate_by" style="width: inherit; display: inline-block;">
+                      {% for pag in paginateValues %}
+                      <option {% if pag == paginateSize %} selected {% endif %}>{{pag}}</option>
+                      {% endfor %}
+                    </select>
+                    <a role="button" class="btn btn-xs" title="Toon dialecten op kaart"
+                       onclick="ru.mapview.dialect_map(this);"
+                       targeturl="{% url 'dialectmap' %}" targetid="" >
+                      <i class="far fa-map" style="color: brown;"></i>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+        </form>
+      </div>
+
+    <!-- Make sure the modal form is loaded -->
+    {% include 'mapview/map_view.html' %}
+
+    {% if object_list %}
+      <h3>Dialecten</h3>
+      <div class="row">
+          <div class="col-sm-4"><span>Gevonden: </span><span>{{entrycount}}</span></div>
+          <div class="col-sm-8">
+          <span class="step-links pull-right">
+
+          {% include 'dictionary/pagination.html' %}
+
+          </span>
+          </div>
+      </div>
+      <table class="table table-hover">
+        <thead><tr><th class="hidden">id</th><th>Plaats</th><th>Nieuwe Kloekecode</th><th class="hidden">Toelichting</th></tr></thead>
+        <tbody>
+        {% for dialect in object_list %}
+          <tr class="dict-entry">
+            <td class="hidden"> {{ dialect.id }}</td>
+            <td>
+              <!--<span class="dialect-stad"><a href="{% url 'locationsearch' %}?search={{dialect.stad|urlencode}}">{{dialect.stad}}</a></span> -->
+              <span class="dialect-stad"><a href="{% url 'lemmasearch' %}?dialectCity={{dialect.stad|urlencode}}">{{dialect.stad}}</a></span>
+            </td>
+            <td>
+              <span class="dialect-nieuw">{{dialect.nieuw}}</span>
+            </td>
+            <td class="hidden">
+              <span class="toelichting"></span>
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>Er zijn geen dialecten beschikbaar.</p>
+    {% endif %}
+
+      <div class="pagination">
+          <span class="step-links">
+
+          {% include 'dictionary/pagination.html' %}
+
+          </span>
+      </div>
+
+
+{% endblock content %}
+

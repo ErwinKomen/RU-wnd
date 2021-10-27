@@ -1,0 +1,81 @@
+{% extends "dictionary/layout.html" %}
+
+{% load static %}
+
+{% block content %}
+
+<div name="index"></div>
+
+
+<div class="jumbotron">
+    <h2>Elektronisch Woordenboek van de Gelderse Dialecten (e-WGD)</h2>
+    <p class="lead"></p> 
+
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+      <p>
+        Het e-WGD bevat de dialectgegevens die verzameld zijn in het project van het 
+      <em>Woordenboek van de Gelderse dialecten</em>. 
+      Het betreft de dialecten van de Rivierenstreek en de Veluwe, twee Gelderse gebieden die worden aangegeven als de donkergekleurde gebieden op de bijgaande kaart. 
+      De twee licht gekleurde gebieden, de Liemers en de Achterhoek, komen nog beschikbaar in het e-WALD: 
+      het electronisch <em>Woordenboek van de Achterhoekse en Liemerse dialecten</em>.
+      </p>
+      <p>
+      De zes afleveringen van de Woordenboeken van de Gelderse Dialecten (WGD) zijn samengesteld tussen 2001 en 2006 (zie Tabblad Overzichten). 
+      De redacteuren waren dr. Charlotte Giesbers en dr. Harrie Scholtmeijer. 
+      De woordenboeken beschrijven specifieke delen van de algemene woordenschat, nl. het huis, de mens en de wereld. 
+      De informatie in de woordenboeken is afkomstig van een groot aantal informanten, die vrijwillig de vragenlijsten invulden. 
+      Het project is gefinancierd door de Provincie Gelderland en de Faculteit Letteren van de Radboud Universiteit Nijmegen. 
+      Daarnaast waren meerdere partijen betrokken bij de totstandkoming van het WGD: 
+      het Gelders Erfgoed, het Staring Instituut, de IJsselacademie en de Stichting Grensoverschrijdende Streektalen.
+      </p>
+      <p>
+        Er is met de vragenlijsten meer materiaal verzameld dan wat in de gedrukte afleveringen van het WGD is opgenomen. 
+      Het e-WGD omvat al het materiaal van de vragenlijsten. 
+      In de gedrukte afleveringen is verder nog gebruik gemaakt van gegevens uit een oudere dialectenquête (SGV) en van lokale woordenboeken.  
+      Deze gegevens zijn niet in het e-WGD opgenomen.
+      </p>
+      <p>
+      In het e-WGD kunnen geïnteresseerden de Gelderse <b>trefwoorden</b> opzoeken voor bepaalde <b>begrippen</b>, 
+      zoals ‘onweersbui’ of ‘modderkruiper’. 
+      Daarbij worden ook de verschillende uitspraakvarianten, de zogenoemde <b>dialectopgaven</b>, van de trefwoorden getoond.
+      </p>
+
+    <p>Het is ook mogelijk alle trefwoorden van één bepaalde Gelderse <b>plaats</b> op te zoeken, 
+      hetzij door te zoeken op de plaatsnaam, hetzij door te zoeken op de <b>Kloekecode</b> van de bewuste plaatsnaam. 
+      De <a href="http://www.meertens.knaw.nl/kloeke/">Kloekecodes</a> zijn unieke nummeringen die 
+      de dialectoloog G.G. Kloeke in 1926 heeft toegekend aan de plaatsen 
+      en gehuchten in Nederland, Vlaanderen, Frans-Vlaanderen en het noordwesten van Duitsland. 
+      Ze bestaan uit een hoofdletter gevolgd door drie cijfers met soms een kleine letter daaraan toegevoegd. 
+      Omdat de oorspronkelijke nummering in de loop van de tijd is uitgebreid, bestaan er een naast de oude 
+      Kloekecodes ook nieuwe Kloekecodes; in de zoekapplicatie wordt alleen de nieuwe Kloekecode getoond.</p>
+
+    <p>Het e-WGD bevat 3.969 begrippen, 63.122 trefwoorden en 197.718 dialectopgaven, verzameld in ruim 450 Gelderse plaatsen 
+      ofwel dialecten (iedere plaats vertegenwoordigt een eigen dialect).</p>
+
+    <p>De website met e-WGD is op <span class="highlight">xx xxxxxx 2019</span> feestelijk gelanceerd tijdens 
+      een dialectencongres in Nijmegen.
+      Eerder zijn de websites van <a href="http://www.e-wbd.nl/">e-WLD</a> (Brabant) en <a href="http://www.e-wld.nl/">e-WLD</a> (Limburg) beschikbaar gesteld.
+
+      </p>
+  </div>
+  <div class="col-md-6">
+    <a target="_blank" href="{% static 'dictionary/content/taalkaart-wgd-large.jpg' %}">
+    <img src="{% static 'dictionary/content/taalkaart-wgd.jpg' %}" 
+         alt="Hoofdgebieden van de Gelderse dialecten" 
+         title="Hoofdgebieden van de Gelderse dialecten (TODO: opsomming...)" 
+         style="float:right;width: 100%;" ></a>
+    <p>
+      Kaart van de provincie Gelderland met vier dialectgebieden. 
+      De donkerder gekleurde gebieden zijn de Rivierenstreek in het zuiden en de Veluwe in het noorden. 
+      Deze gebieden vallen onder het Woordenboek van de Gelderse Dialecten, het WGD.  
+      De twee licht getinte gebieden, de Liemers en de Achterhoek, worden gedekt door het Woordenboek van de Achterhoekse en Liemerse dialecten, het WALD. 
+      Nu het e-WGD is gerealiseerd, is de volgende stap de realisatie van de digitale versie van het WALD dat uiteraard het e-WALD zal heten.  
+    </p>
+  </div>
+</div>
+
+
+{% endblock %}

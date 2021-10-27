@@ -1,0 +1,87 @@
+﻿{% extends "dictionary/layout.html" %}
+
+{% load staticfiles %}
+
+{% block content %}
+
+
+<div class="aflevering-overview">
+
+  <div class="row">
+    <div class="col-md-12" align="center">
+    <a target="_blank" href="{% static 'dictionary/content/boeken-wbd.jpg' %}">
+      <img src="{% static 'dictionary/content/boeken-wbd.jpg' %}" alt="Alle delen op een rij" title="Alle delen op een rij" style="height:500px;">
+    </a>
+    </div>
+  </div>
+
+  <p><span class="aflevering">&nbsp;</span></p>
+
+  <p class="citation-line">
+    {% spaceless %}
+    <span class="citation-intro">WBD </span>
+          
+    <span class="citation-number">Inleiding: </span>
+    <span class="citation-author">dr. A. Weijnen, dr. J. van Bakel, </span>
+    <i>
+      <span class="citation-title-sectietitel">Voorlopige inleiding op het Woordenboek van de Brabantse Dialecten</span>
+    </i>
+    <span class="citation-publication">, Assen 1967 (42p.).</span>
+    {% endspaceless %}
+    <span class="citation-pdf">(<a href="/{{app_prefix}}static/dictionary/content/pdf/{{intro_pdf}}">pdf</a>)</span>
+  </p>
+
+  <p class="citation-line">
+    {% spaceless %}
+    <span class="citation-intro">WBD </span>
+          
+    <span class="citation-number">Inleiding op deel III: </span>
+    <span class="citation-author">Lic. R. Belemans, Dr. J. Goossens, </span>
+    <i>
+      <span class="citation-title-sectietitel">Inleiding en klankgeografie van de Brabantse dialecten</span>
+    </i>
+    <span class="citation-publication">, Assen 2000 (232p.).</span>
+    {% endspaceless %}
+    <span class="citation-pdf">(<a href="/{{app_prefix}}static/dictionary/content/pdf/{{intro_op_drie_pdf}}">pdf</a>)</span>
+  </p>
+
+  {% for deel in object_list %}
+    <p><b>
+      <span>Woordenboek van de Brabantse dialecten, Deel {{deel.nummer}}.</span>
+      <span class="deel">{{deel.titel}}</span>
+    </b></p>
+
+    <!-- Take all the [aflevering] elements for this [deel] and divide them over their [lemma] -->
+    {% regroup deel.deel_afleveringen.all|dictsort:"get_number" by aflnum as afl_list %}
+    {% for afl in afl_list %}
+      <p class="citation-line">
+        {% for deze in afl.list %}
+          {% spaceless %}
+          <span class="citation-intro">WBD {{deel.romeins}}</span>
+          
+          <span class="citation-number">{% if deze.sectietitel != "" %}, {{deze.sectie}}.{% else %}. {% endif %}{{deze.aflnum}}: </span>
+          <span class="citation-author">{{deze.auteurs}}, </span>
+          <i>
+            <span class="citation-title-intro">WBD {{deel.romeins}}, </span>
+            {% if deze.inleiding %}<span class="citation-title-inleiding">Inleiding en </span>{% endif %}
+            {% if deze.sectietitel != "" %}
+            <span class="citation-title-sectienummer">Sectie {{deze.sectie}}, </span>
+            <span class="citation-title-sectietitel">{{deze.sectietitel}}, </span>
+            {% endif %}
+            <span class="citation-title-aflnum">Aflevering {{deze.aflnum}}. </span>
+            <span class="citation-title-afltitel">{{deze.afltitel}}</span>
+          </i>
+          <span class="citation-publication">, {{deze.plaats}} {{deze.jaar}}.</span>
+          {% endspaceless %}
+          <span class="citation-pdf">(<a href="/{{app_prefix}}static/dictionary/content/pdf/{{deze.get_pdf}}">pdf</a>)</span>
+        {% endfor %}
+      </p>
+    {% endfor %}
+
+  {% endfor %}
+
+</div>
+
+
+{% endblock %}
+

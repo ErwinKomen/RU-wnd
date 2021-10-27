@@ -1,0 +1,77 @@
+{% extends "dictionary/layout.html" %}
+{% load staticfiles %}
+
+
+{% block content %}
+
+<div class="row">
+  
+  <div class="col-md-6">
+    <h3>Bewerking en digitalisering</h3>
+
+    <p>In <span class="approved">2015</span> zijn de eerste twee delen van het Woordenboek van de Gelderse Dialecten gedigitaliseerd 
+      dankzij een subsidie die CLARIN heeft toegekend voor het project ‘CARE: CuRatie en integratie 
+      REgionale woordenboeken’ onder leiding van Nicoline van der Sijs, Henk van den Heuvel en Roeland van Hout (RU).
+    </p>
+
+    <p>De zes afleveringen van de Woordenboeken van de Gelderse Dialecten (WGD) zijn samengesteld tussen 2001 en 2006 (zie Tabblad <a target="_blank" href="{% url 'delen' %}">Overzichten</a>). 
+    De redacteuren waren dr. Charlotte Giesbers en dr. Harrie Scholtmeijer. De woordenboeken beschrijven specifieke delen van de algemene woordenschat, 
+    nl. het huis, de mens en de wereld. De informatie in de woordenboeken is afkomstig van een groot aantal informanten, die vrijwillig de vragenlijsten invulden. 
+    Het project is gefinancierd door de Provincie Gelderland en de Faculteit Letteren van de Radboud Universiteit Nijmegen. 
+    Daarnaast waren meerdere partijen betrokken bij de totstandkoming van het WGD: het Gelders Erfgoed, het Staring Instituut, 
+    de IJsselacademie en de Stichting Grensoverschrijdende Streektalen. </p>
+
+    <p>Er is met de vragenlijsten meer materiaal verzameld dan wat in de gedrukte afleveringen van het WGD is opgenomen. 
+    Het e-WGD omvat al het materiaal van de vragenlijsten. In de gedrukte afleveringen is verder nog gebruik gemaakt van gegevens 
+    uit een oudere dialectenquête (SGV) en van lokale woordenboeken. Deze gegevens zijn niet in het e-WGD opgenomen. </p>
+
+    <p><span class="approved">De studentassistenten Hanna van den Heuvel en Inge Pasman hebben de resulterende excelfiles gecontroleerden aangegeven 
+      welke lemma’s en trefwoorden in zowel de excelfiles als de corresponderende boekuitgaven voorkwamen en welke slechts in één van beide. 
+      De curatie van plaatsnamen en kloekecodes is uitgevoerd door Henk van den Heuvel en Erwin Komen van het Humanities Lab</span></p>
+
+
+  </div>
+
+  <div class="col-md-6">
+    <div class="row">
+      <a target="_blank" href="{% static 'dictionary/content/taalkaart-wgd-plaatsen.jpg' %}">
+        <img src="{% static 'dictionary/content/taalkaart-wgd-plaatsen.jpg' %}" 
+             alt="Een indeling van de Gelderse dialecten" 
+             title="Een indeling van de Gelderse dialecten
+(opsomming...)" 
+             style="width: 100%;z-index:-2; margin-top: 20px;" >
+      </a>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <span class="bronvermelding pull-right">
+            &copy;&nbsp;Hermsen, T (2019).
+        </span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="row">
+  <div class="col-md-12">
+
+    <h3>Kaart</h3>
+    <p>Het kaartje omvat het onderzoeksgebied van het WGD. 
+   Het gebied omvat het Rivierengebied en de Veluwe. Op de kaart is te zien welke plaatsen hebben deelgenomen 
+    en dat zijn die plaatsen waar vrijwilligers gevonden zijn om de vragenlijsten in te vullen. 
+    Helaas ontbreekt Arnhem.</p>
+    <p>
+      Er zijn ook enkele plaatsen opgenomen die buiten het gebied liggen om na te gaan hoe aangrenzende gebieden aansluiten. 
+      Voor het Rivierengebied zijn dat Rhenen, Achterberg en Leerbroek. 
+      Voor de Veluwe zijn dat Bunschoten-Spakenburg en Huizen.
+    </p>
+
+    <h3>Techniek</h3>
+    <p>De e-WGD-applicatie is ontwikkeld door Erwin R. Komen van de Technical Support Group van het Humanities Lab 
+    van de Radboud Universiteit onder supervisie van Henk van den Heuvel. </p>
+
+  </div>
+</div>
+
+{% endblock %}

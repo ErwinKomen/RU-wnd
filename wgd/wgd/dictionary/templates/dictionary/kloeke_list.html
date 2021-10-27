@@ -1,0 +1,140 @@
+﻿{% extends "dictionary/layout.html" %}
+
+{% block content %}
+
+      <div class="panel panel-default">
+        <form name='kloekesearch' id='kloekesearch' action="" method='get' onsubmit="return do_search('#id_submit_button', 'kloeke', 'simple');" >
+            <!-- For POST downloading-->
+            {% csrf_token %}
+
+            <!-- EK: A sort-order specification is in a hidden form field, which is filled by JS:do_sort_column() -->
+            <div class="hidden">
+                <input name='sortOrder' class='form-control' value='stad' >
+                <input name='search_type' class='form-control' value='stad'>
+                <input id="submit_type" name='submit_type' class='form-control' value='simple'>
+                <input id="downloadtype" name="downloadtype" value="" />
+            </div>
+
+            <!-- The top layer of searching: download button(s) -->
+            <div class="row">
+              <div class="col-sm-2 pull-right" align="right" style="margin-top: 5px;">
+                <a id="downloadmenu" role="button" class="btn btn-xs btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" 
+                        onclick="" >
+                  Download<span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="downloadmenu">
+                  <li><a href="#" downloadtype="xlsx" ajaxurl="{% url 'kloekecodes' %}" onclick="post_download(this);">Excel</a></li>
+                  <li class="divider" role="separator"></li>
+                  <li><a href="#" downloadtype="csv" ajaxurl="{% url 'kloekecodes' %}" onclick="post_download(this);">csv (tab-separated)</a></li>
+                  <li><a href="#" downloadtype="json" ajaxurl="{% url 'kloekecodes' %}" onclick="post_download(this);">json</a></li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- the Actual search parameters -->
+            <div id="searchdefault" class="row">
+              <div class="col-sm-3">
+                <label>&nbsp;</label>
+                <div class='input-group'>
+                    <label class='input-group-addon' 
+                           data-toggle="popover" data-trigger="hover"
+                           data-placement="right" data-content="Willekeurige tekens: ? (één) * (0 of meer). Groep tekens: [m-n]"
+                           for='id_stad'>{{searchform.stad.label}}</label>
+                    <input name='stad' class='form-control input-sm' {% if searchform.search.value %}value='{{searchform.stad.value}}'{% endif %}>
+                </div>
+              </div>
+              <div class="col-sm-3">
+                <label>&nbsp;</label>
+                <div class='input-group'>
+                    <label class='input-group-addon' 
+                           data-toggle="popover" data-trigger="hover"
+                           data-placement="right" data-content="Willekeurige tekens: ? (één) * (0 of meer). Groep tekens: [m-n]"
+                           for='id_code'>{{searchform.code.label}}</label>
+                    <input name='code' class='form-control input-sm' {% if searchform.code.value %}value='{{searchform.code.value}}'{% endif %}>
+                </div>
+              </div>
+
+              <!-- Empty (for future use) -->
+              <div class="col-sm-2">&nbsp;</div>
+
+              <!-- Pagination adjustment -->
+              <div class="col-sm-2" align="right">
+                <div class='form-group' id='paginate_by'>
+                  <label for='paginate_by'>Per pagina</label>
+                  <select class='form-control input-sm' name="paginate_by">
+                    {% for pag in paginateValues %}
+                    <option {% if pag == paginateSize %} selected {% endif %}>{{pag}}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+
+              <!-- Buttons too search and reset a search-->
+              <div class="col-sm-2 pull-right">
+                <div><label>&nbsp;</label></div>
+                <div class='btn-group'>
+                    <!-- Make sure no button has the *name* 'submit', otherwise submit() cannot be used -->
+                    <input class='btn btn-primary btn-sm' type="submit" onclick="do_search(this, 'kloeke', 'simple');" name="submit_type" value="Zoek">
+                    <input class='btn btn-default btn-sm' type="submit" onclick="do_search(this, 'kloeke', 'Herstel');" name="submit_type" value="Herstel">
+                </div>
+              </div>
+            </div>
+
+        </form>
+      </div>
+
+
+    {% if object_list %}
+      <h3>Kloekecodes</h3>
+      <div class="row">
+          <div class="col-sm-4"><span>Totaal: </span><span>{{entrycount}}</span></div>
+          <div class="col-sm-8">
+          <span class="step-links pull-right">
+
+          {% include 'dictionary/pagination.html' %}
+
+          </span>
+          </div>
+      </div>
+      <table class="table table-hover">
+        <thead><tr><th class="hidden">id</th><th>Kloekecode</th><th>(Oud)</th><th>Plaats</th><th>Zelfde code</th><th>Zelfde stad</th></tr></thead>
+        <tbody>
+        {% for kloeke in object_list %}
+          <tr class="dict-entry">
+            <td class="hidden"> {{ kloeke.id }}</td>
+            <td>
+              <span class="dialect-nieuw kloekecode">{{kloeke.code}}</span>
+            </td>
+            <td>
+              <span class="dialect-old kloekecode">{{kloeke.oud}}</span>
+            </td>
+            <td>
+              <span class="dialect-stad"><a href="{% url 'lemmasearch' %}?dialectCity={{kloeke.stad|urlencode}}">{{kloeke.stad}}</a></span>
+              {% if kloeke.alt1 %}<span class="kloekecode">{{kloeke.alt1}}</span>{% endif %}
+              {% if kloeke.alt2 %}<span class="kloekecode">{{kloeke.alt2}}</span>{% endif %}
+            </td>
+            <td>
+              <span class="dialect-stad">{{kloeke.numcode}}</span>
+            </td>
+            <td>
+              <span class="dialect-stad">{{kloeke.numstad}}</span>
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>Er zijn geen kloekecodes beschikbaar.</p>
+    {% endif %}
+
+      <div class="pagination">
+          <span class="step-links">
+
+          {% include 'dictionary/pagination.html' %}
+
+          </span>
+      </div>
+
+
+{% endblock content %}
+
