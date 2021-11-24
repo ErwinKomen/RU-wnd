@@ -40,6 +40,7 @@ paginateEntries = 100
 # OLD: paginateValues = (1000, 500, 250, 100, 50, 40, 30, 20, 10, )
 paginateValues = (100, 50, 20, 10, 5, 2, 1, )
 outputColumns = ['begrip', 'trefwoord', 'dialectopgave', 'Kloekecode', 'aflevering', 'bronnenlijst']
+rGarbage = re.compile(r'[^a-zA-Z0-9 -\#\[\]\?]')
 
 THIS_DICTIONARY = "e-WBD"
 
@@ -214,7 +215,7 @@ def do_repair(request):
 
 def adapt_search(val):
     # First trim
-    val = val.strip()    
+    val = strip_garbage(val).strip()    
     # Adapt for the use of '#'
     if '#' in val:
         # val = val.replace('#', '\\b.*')
@@ -222,6 +223,12 @@ def adapt_search(val):
         val = r'(^|(.*\b))' + val.replace('#', r'((\b.*)|$)') # + r'((\b.*)|$)'
     else:
         val = '^' + fnmatch.translate(val) + '$'
+    return val
+
+def strip_garbage(val):
+    """Remove any garbage characters from the value"""
+
+    val = rGarbage.sub('', val)
     return val
 
 def export_csv(qs, sFileName):
@@ -926,7 +933,7 @@ class TrefwoordListView(ListView):
 
             # Fine-tuning: search string is the LEMMA
             if 'search' in get and get['search'] != '':
-                val = get['search']
+                val = strip_garbage(get['search'])
                 if '*' in val or '[' in val or '?' in val or '#' in val:
                     val = adapt_search(val)
                     lstQ.append(Q(woord__iregex=val) )
@@ -1479,7 +1486,7 @@ class LemmaListView(ListView):
 
             # Fine-tuning: search string is the LEMMA
             if 'search' in get and get['search'] != '':
-                val = get['search']
+                val = strip_garbage(get['search'])
                 if '*' in val or '[' in val or '?' in val or '#' in val:
                     val = adapt_search(val)
                     lstQ.append(Q(gloss__iregex=val) )
@@ -1563,6 +1570,7 @@ class LemmaListView(ListView):
         except:
             msg = oErr.get_error_message()
             oErr.DoError("LemmaListView")
+            qse = Lemma.objects.none()
 
         # Return the resulting filtered and sorted queryset
         return qse

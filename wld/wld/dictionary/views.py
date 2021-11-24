@@ -39,6 +39,7 @@ paginateEntries = 100
 # paginateValues = (1000, 500, 250, 100, 50, 40, 30, 20, 10, )
 paginateValues = (100, 50, 20, 10, 5, 2, 1, )
 outputColumns = ['begrip', 'trefwoord', 'dialectopgave', 'Kloekecode', 'aflevering', 'bronnenlijst']
+rGarbage = re.compile(r'[^a-zA-Z0-9 -\#\[\]\?]')
 
 THIS_DICTIONARY = "e-WLD"
 
@@ -213,7 +214,7 @@ def do_repair(request):
 
 def adapt_search(val):
     # First trim
-    val = val.strip()  
+    val = strip_garbage(val).strip()    
     # Adapt for the use of '#'
     if '#' in val:
         val = r'(^|(.*\b))' + val.replace('#', r'((\b.*)|$)') # + r'((\b.*)|$)'
@@ -221,6 +222,12 @@ def adapt_search(val):
         val = '^' + fnmatch.translate(val) + '$'
     # Make sure to get the hyphen literally  
     val = val.replace("-", "\-")
+    return val
+
+def strip_garbage(val):
+    """Remove any garbage characters from the value"""
+
+    val = rGarbage.sub('', val)
     return val
 
 def export_csv(qs, sFileName):
@@ -885,7 +892,7 @@ class TrefwoordListView(ListView):
 
             # Fine-tuning: search string is the LEMMA
             if 'search' in get and get['search'] != '':
-                val = get['search']
+                val = strip_garbage( get['search'])
                 if '*' in val or '[' in val or '?' in val or '#' in val:
                     val = adapt_search(val)
                     lstQ.append(Q(woord__iregex=val) )
@@ -1421,108 +1428,115 @@ class LemmaListView(ListView):
         return qse
 
     def get_queryset(self):
-        # Measure how long it takes
-        if self.bDoTime:
-            iStart = get_now_time()
+        oErr = ErrHandle()
+        try:
+            # Measure how long it takes
+            if self.bDoTime:
+                iStart = get_now_time()
 
-        # Get the parameters passed on with the GET or the POST request
-        get = self.request.GET if self.request.method == "GET" else self.request.POST
-        self.get = get
+            # Get the parameters passed on with the GET or the POST request
+            get = self.request.GET if self.request.method == "GET" else self.request.POST
+            self.get = get
 
-        # Get possible user choice of 'strict'
-        if 'strict' in get:
-            self.strict = (get['strict'] == "True")
+            # Get possible user choice of 'strict'
+            if 'strict' in get:
+                self.strict = (get['strict'] == "True")
 
-        lstQ = []
-        bHasSearch = False
-        bHasFilter = False
+            lstQ = []
+            bHasSearch = False
+            bHasFilter = False
 
-        # Fine-tuning: search string is the LEMMA
-        if 'search' in get and get['search'] != '':
-            val = get['search']
-            if '*' in val or '[' in val or '?' in val or '#' in val:
-                val = adapt_search(val)
-                lstQ.append(Q(gloss__iregex=val) )
-            else:
-                # Strive for equality, but disregard case
-                lstQ.append(Q(gloss__iexact=val))
-            bHasSearch = True
+            # Fine-tuning: search string is the LEMMA
+            if 'search' in get and get['search'] != '':
+                val = strip_garbage(get['search'])
+                if '*' in val or '[' in val or '?' in val or '#' in val:
+                    val = adapt_search(val)
+                    lstQ.append(Q(gloss__iregex=val) )
+                else:
+                    # Strive for equality, but disregard case
+                    lstQ.append(Q(gloss__iexact=val))
+                bHasSearch = True
 
-            ## check for possible exact numbers having been given
-            #if re.match('^\d+$', val):
-            #    lstQ.append(Q(sn__exact=val))
+                ## check for possible exact numbers having been given
+                #if re.match('^\d+$', val):
+                #    lstQ.append(Q(sn__exact=val))
  
-        # Check for dialect city
-        if 'dialectCity' in get and get['dialectCity'] != '':
-            val = get['dialectCity']
-            if '*' in val or '[' in val or '?' in val or '#' in val:
-                # val = adapt_search(get['dialectCity'])
-                val = adapt_search(val)
-                lstQ.append(Q(entry__dialect__stad__iregex=val))
-            else:
-                # Strive for equality, but disregard case
-                lstQ.append(Q(entry__dialect__stad__iexact=val))
-            bHasFilter = True
+            # Check for dialect city
+            if 'dialectCity' in get and get['dialectCity'] != '':
+                val = get['dialectCity']
+                if '*' in val or '[' in val or '?' in val or '#' in val:
+                    # val = adapt_search(get['dialectCity'])
+                    val = adapt_search(val)
+                    lstQ.append(Q(entry__dialect__stad__iregex=val))
+                else:
+                    # Strive for equality, but disregard case
+                    lstQ.append(Q(entry__dialect__stad__iexact=val))
+                bHasFilter = True
 
-        # Check for dialect code (Kloeke)
-        if 'dialectCode' in get and get['dialectCode'] != '':
-            val = get['dialectCode']
-            if '*' in val or '[' in val or '?' in val or '#' in val:
-                val = adapt_search(val)
-                lstQ.append(Q(entry__dialect__nieuw__iregex=val))
-            else:
-                # Strive for equality, but disregard case
-                lstQ.append(Q(entry__dialect__nieuw__iexact=val))
-            bHasFilter = True
+            # Check for dialect code (Kloeke)
+            if 'dialectCode' in get and get['dialectCode'] != '':
+                val = get['dialectCode']
+                if '*' in val or '[' in val or '?' in val or '#' in val:
+                    val = adapt_search(val)
+                    lstQ.append(Q(entry__dialect__nieuw__iregex=val))
+                else:
+                    # Strive for equality, but disregard case
+                    lstQ.append(Q(entry__dialect__nieuw__iexact=val))
+                bHasFilter = True
 
-        # Check for dialect word, which is a direct member of Entry
-        if 'woord' in get and get['woord'] != '':
-            val = adapt_search(get['woord'])
-            lstQ.append(Q(entry__woord__iregex=val))
-            bHasFilter = True
+            # Check for dialect word, which is a direct member of Entry
+            if 'woord' in get and get['woord'] != '':
+                val = adapt_search(get['woord'])
+                lstQ.append(Q(entry__woord__iregex=val))
+                bHasFilter = True
 
-        # Check for aflevering
-        if 'aflevering' in get and get['aflevering'] != '':
-            # What we get should be a number
-            val = get['aflevering']
-            if val.isdigit():
-                iVal = int(val)
-                if iVal>0:
-                    lstQ.append(Q(entry__aflevering__id=iVal))
-                    bHasFilter = True
+            # Check for aflevering
+            if 'aflevering' in get and get['aflevering'] != '':
+                # What we get should be a number
+                val = get['aflevering']
+                if val.isdigit():
+                    iVal = int(val)
+                    if iVal>0:
+                        lstQ.append(Q(entry__aflevering__id=iVal))
+                        bHasFilter = True
 
-        # Check for mijn
-        if self.bUseMijnen and  'mijn' in get and get['mijn'] != '':
-            # What we get should be a number
-            val = get['mijn']
-            if val.isdigit():
-                iVal = int(val)
-                if iVal>0:
-                    lstQ.append(Q(entry__mijnlijst__id=iVal))
-                    bHasFilter = True
+            # Check for mijn
+            if self.bUseMijnen and  'mijn' in get and get['mijn'] != '':
+                # What we get should be a number
+                val = get['mijn']
+                if val.isdigit():
+                    iVal = int(val)
+                    if iVal>0:
+                        lstQ.append(Q(entry__mijnlijst__id=iVal))
+                        bHasFilter = True
 
-        # Method #8 -- use the lemma.toonbaar property
-        lemma_hide = Lemma.objects.filter(toonbaar=0)
+            # Method #8 -- use the lemma.toonbaar property
+            lemma_hide = Lemma.objects.filter(toonbaar=0)
 
-        qse = Lemma.objects.exclude(id__in=lemma_hide).filter(*lstQ).select_related().order_by('gloss').distinct()
+            qse = Lemma.objects.exclude(id__in=lemma_hide).filter(*lstQ).select_related().order_by('gloss').distinct()
 
-        # Time measurement
-        if self.bDoTime:
-            print("LemmaListView get_queryset point 'a': {:.1f}".format( get_now_time() - iStart))
-            print("LemmaListView query: {}".format(qse.query))
+            # Time measurement
+            if self.bDoTime:
+                print("LemmaListView get_queryset point 'a': {:.1f}".format( get_now_time() - iStart))
+                print("LemmaListView query: {}".format(qse.query))
 
-        # Note the number of ITEMS we have
-        #   (The nature of these items depends on the approach taken)
-        # self.entrycount = qse.count()
-        # Note: while taking more time here, it saves time later
-        self.entrycount = len(qse)
+            # Note the number of ITEMS we have
+            #   (The nature of these items depends on the approach taken)
+            # self.entrycount = qse.count()
+            # Note: while taking more time here, it saves time later
+            self.entrycount = len(qse)
 
-        # Time measurement
-        if self.bDoTime:
-            print("LemmaListView get_queryset point 'b': {:.1f}".format( get_now_time() - iStart))
+            # Time measurement
+            if self.bDoTime:
+                print("LemmaListView get_queryset point 'b': {:.1f}".format( get_now_time() - iStart))
 
-        # Show that we responded
-        print("Lemmalistview responded", file=sys.stderr)
+            # Show that we responded
+            print("Lemmalistview responded", file=sys.stderr)
+        except:
+            msg = oErr.get_error_message()
+            oErr.DoError("LemmaListView")
+            qse = Lemma.objects.none()
+
         # Return the resulting filtered and sorted queryset
         return qse
 
@@ -1873,7 +1887,8 @@ class LocationListView(ListView):
 
         # Fine-tuning: search string is the STAD
         if 'search' in get and get['search'] != '':
-            val = adapt_search(get['search'])
+            val = strip_garbage( get['search'])
+            val = adapt_search(val)
             lstQ.append(Q(stad__iregex=val) )
             bHasSearch = True
 
@@ -2037,7 +2052,8 @@ class DialectListView(ListView):
 
         # Fine-tuning: search string is the LEMMA
         if 'search' in get and get['search'] != '':
-            val = adapt_search(get['search'])
+            val = strip_garbage( get['search'])
+            val = adapt_search(val)
             query = Q(stad__iregex=val) 
 
             # check for possible exact numbers having been given
@@ -2319,7 +2335,8 @@ class MijnListView(ListView):
 
         # Fine-tuning: search string is the LEMMA
         if 'search' in get and get['search'] != '':
-            val = adapt_search(get['search'])
+            val = strip_garbage( get['search'])
+            val = adapt_search(val)
             # The main search is on the NAME of the mine
             query = Q(naam__iregex=val) 
 
