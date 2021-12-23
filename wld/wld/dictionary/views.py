@@ -642,94 +642,102 @@ class TrefwoordListView(ListView):
         # Call the base implementation first to get a context
         context = super(TrefwoordListView, self).get_context_data(**kwargs)
 
-        # Action depends on the approach
-        if self.bWbdApproach:
-            # Need to adapt the object_list to get the entries to be used
-            context['object_list'] = self.get_entryset(context['page_obj'])
+        oErr = ErrHandle()
+        try:
+            # Action depends on the approach
+            if self.bWbdApproach:
+                # Need to adapt the object_list to get the entries to be used
+                context['object_list'] = self.get_entryset(context['page_obj'])
 
-        # Get parameters for the search
-        initial = self.request.GET
-        if initial is None:
-            initial = {'optdialect': 'stad'}
+            # Get parameters for the search
+            initial = self.request.GET
+            if initial is None:
+                initial = {'optdialect': 'stad'}
 
-        # Fill the 'searchform' context variable with the values that are received from the GET request
-        search_form = TrefwoordSearchForm(initial)
-        context['searchform'] = search_form
+            # Fill the 'searchform' context variable with the values that are received from the GET request
+            search_form = TrefwoordSearchForm(initial)
+            context['searchform'] = search_form
 
-        if 'paginate_by' in initial:
-            context['paginateSize'] = int(initial['paginate_by'])
-            self.paginate_by = int(initial['paginate_by'])
-        else:
-            context['paginateSize'] = self.paginate_by  # paginateSize
+            if 'paginate_by' in initial:
+                context['paginateSize'] = int(initial['paginate_by'])
+                self.paginate_by = int(initial['paginate_by'])
+            else:
+                context['paginateSize'] = self.paginate_by  # paginateSize
 
-        if self.bUseMijnen:
-            # Try to retain the choice for Mijn
-            if 'mijn' in initial:
-                mijn_id = int(initial['mijn'])
-                context['mijnkeuze'] = mijn_id
-                mijn_inst = Mijn.objects.filter(id=mijn_id).first()
-                if mijn_inst == None:
+            if self.bUseMijnen:
+                # Try to retain the choice for Mijn
+                str_mijn = initial.get("mijn")
+                if str_mijn != None and str_mijn != "":
+                    mijn_id = int(str_mijn)
+                    context['mijnkeuze'] = mijn_id
+                    mijn_inst = Mijn.objects.filter(id=mijn_id).first()
+                    if mijn_inst == None:
+                        context['mijnnaam'] = ''
+                    else:
+                        context['mijnnaam'] = mijn_inst.naam
+                else:
+                    context['mijnkeuze'] = 0
                     context['mijnnaam'] = ''
-                else:
-                    context['mijnnaam'] = mijn_inst.naam
+            # Process and retain the choice for Aflevering
+            if 'aflevering' in initial:
+                str_afl = initial.get("aflevering")
+                if str_afl != None and str_afl != "":
+                    context['aflkeuze'] = int(str_afl)
+                    afl = Aflevering.objects.filter(id=context['aflkeuze']).first()
+                    if afl == None:
+                        context['afl'] = ''
+                    else:
+                        context['afl'] = afl.get_summary()
             else:
-                context['mijnkeuze'] = 0
-                context['mijnnaam'] = ''
-        # Process and retain the choice for Aflevering
-        if 'aflevering' in initial:
-            context['aflkeuze'] = int(initial['aflevering'])
-            afl = Aflevering.objects.filter(id=context['aflkeuze']).first()
-            if afl == None:
+                context['aflkeuze'] = 0
                 context['afl'] = ''
-            else:
-                context['afl'] = afl.get_summary()
-        else:
-            context['aflkeuze'] = 0
-            context['afl'] = ''
 
-        # Get possible user choice of 'strict'
-        if 'strict' in initial:
-            self.strict = (initial['strict'] == "True")
-        context['strict'] = str(self.strict)
+            # Get possible user choice of 'strict'
+            if 'strict' in initial:
+                self.strict = (initial['strict'] == "True")
+            context['strict'] = str(self.strict)
         
-        # Determine the count 
-        context['entrycount'] = self.entrycount   #  self.get_queryset().count()
-        # context['twcount'] = self.twcount
+            # Determine the count 
+            context['entrycount'] = self.entrycount   #  self.get_queryset().count()
+            # context['twcount'] = self.twcount
 
-        # Make sure the paginate-values are available
-        context['paginateValues'] = paginateValues
+            # Make sure the paginate-values are available
+            context['paginateValues'] = paginateValues
 
-        # Set the prefix
-        context['app_prefix'] = APP_PREFIX
+            # Set the prefix
+            context['app_prefix'] = APP_PREFIX
 
-        # Set the afleveringen and mijnen that are available
-        context['afleveringen'] = [afl for afl in Aflevering.objects.all()]
-        context['mijnen'] = [mijn for mijn in Mijn.objects.all().order_by('naam')]
+            # Set the afleveringen and mijnen that are available
+            context['afleveringen'] = [afl for afl in Aflevering.objects.all()]
+            context['mijnen'] = [mijn for mijn in Mijn.objects.all().order_by('naam')]
 
-        # Set the title of the application
-        context['title'] = "{} trefwoorden".format(THIS_DICTIONARY)
+            # Set the title of the application
+            context['title'] = "{} trefwoorden".format(THIS_DICTIONARY)
 
-        # If we are in 'strict' mode, we need to deliver the [qlist]
-        if self.strict:
-            # Transform the paginated queryset into a dict sorted by Dialect/Aflevering
-            lAflev = self.get_qafl(context)
+            # If we are in 'strict' mode, we need to deliver the [qlist]
+            if self.strict:
+                # Transform the paginated queryset into a dict sorted by Dialect/Aflevering
+                lAflev = self.get_qafl(context)
 
-            # Get a list with 'first' and 'last' values for each item in the current paginated queryset
-            lEntry = self.get_qlist(context)
-            # Add the sorted-dialect information to lEntry
-            for idx, item in enumerate(lEntry):
-                # Start or Finish dialect information
-                if item['trefwoord_woord']['first']:
-                    qsa = []
-                # All: add this entry
-                qsa.append(lAflev[idx])
-                if item['trefwoord_woord']['last']:
-                    # COpy the list of Entry elements sorted by Trefwoord/Aflevering here
-                    lEntry[idx]['alist'] = qsa
-                else:
-                    lEntry[idx]['alist'] = None
+                # Get a list with 'first' and 'last' values for each item in the current paginated queryset
+                lEntry = self.get_qlist(context)
+                # Add the sorted-dialect information to lEntry
+                for idx, item in enumerate(lEntry):
+                    # Start or Finish dialect information
+                    if item['trefwoord_woord']['first']:
+                        qsa = []
+                    # All: add this entry
+                    qsa.append(lAflev[idx])
+                    if item['trefwoord_woord']['last']:
+                        # COpy the list of Entry elements sorted by Trefwoord/Aflevering here
+                        lEntry[idx]['alist'] = qsa
+                    else:
+                        lEntry[idx]['alist'] = None
 
-            context['qlist'] = lEntry
+                context['qlist'] = lEntry
+        except:
+            msg = oErr.get_error_message()
+            oErr.DoError("TrefwoordListView/get_context_data")
 
         # Return the calculated context
         return context

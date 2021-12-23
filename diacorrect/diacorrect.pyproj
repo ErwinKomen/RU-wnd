@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>e52b7c77-4dbb-4dce-9082-948775bca8ed</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>diakloeke.py</StartupFile>
+    <StartupFile>diacolor.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -14,7 +14,7 @@
     <RootNamespace>diacorrect</RootNamespace>
     <InterpreterId>{cee766f8-213c-432e-ae52-0977c4fd4972}</InterpreterId>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>-i "D:/Data Files/TG/Dialecten/data/2020/dsdd_keywords_2.json" -o "D:/Data Files/TG/Dialecten/data/2020/dsdd_kloeke_2.json"</CommandLineArguments>
+    <CommandLineArguments>-w -i "D:/Data Files/TG/Dialecten/data/2021/WGD/erwin/WGD-Veluwe-mens-Erwin.xlsx" -o "D:/Data Files/TG/Dialecten/data/2021/WGD/erwin/WGD-Veluwe-mens-Erwin-out.xlsx"</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
     <InterpreterVersion>3.5</InterpreterVersion>
   </PropertyGroup>
@@ -27,6 +27,7 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="diacolor.py" />
     <Compile Include="diacorrect.py" />
     <Compile Include="diakloeke.py">
       <SubType>Code</SubType>
