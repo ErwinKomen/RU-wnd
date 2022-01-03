@@ -1136,141 +1136,147 @@ class LemmaListView(ListView):
         # Call the base implementation first to get a context
         context = super(LemmaListView, self).get_context_data(**kwargs)
 
-        # Get parameters for the search
-        # initial = self.request.GET
-        initial = self.get
-        if initial is None:
-            initial = {'optdialect': 'stad'}
+        oErr = ErrHandle()
+        try:
+            # Get parameters for the search
+            # initial = self.request.GET
+            initial = self.get
+            if initial is None:
+                initial = {'optdialect': 'stad'}
 
-        # Possibly set the page object
-        if 'page' in initial:
-            oPage = context['page_obj']
-            oPage.number = int(initial['page'])
-            context['page_obj'] = oPage
+            # Possibly set the page object
+            if 'page' in initial:
+                oPage = context['page_obj']
+                oPage.number = int(initial['page'])
+                context['page_obj'] = oPage
 
-        # Action depends on the approach
-        if self.bWbdApproach:
+            # Action depends on the approach
+            if self.bWbdApproach:
+                # Start collecting context time
+                if self.bDoTime: iStart = get_now_time()
+                # Need to adapt the object_list to get the entries to be used
+                context['object_list'] = list(self.get_entryset(context['page_obj']))
+                if self.bDoTime:
+                    print("LemmaListView get_context_data: {:.1f}".format( get_now_time() - iStart))
+
             # Start collecting context time
             if self.bDoTime: iStart = get_now_time()
-            # Need to adapt the object_list to get the entries to be used
-            context['object_list'] = list(self.get_entryset(context['page_obj']))
-            if self.bDoTime:
-                print("LemmaListView get_context_data: {:.1f}".format( get_now_time() - iStart))
 
-        # Start collecting context time
-        if self.bDoTime: iStart = get_now_time()
+            search_form = LemmaSearchForm(initial)
 
-        search_form = LemmaSearchForm(initial)
+            context['searchform'] = search_form
 
-        context['searchform'] = search_form
-
-        # Get possible user choice of 'strict'
-        if 'strict' in initial:
-            self.strict = (initial['strict'] == "True")
-        context['strict'] = str(self.strict)
+            # Get possible user choice of 'strict'
+            if 'strict' in initial:
+                self.strict = (initial['strict'] == "True")
+            context['strict'] = str(self.strict)
         
-        # Determine the count 
-        context['entrycount'] = self.entrycount #  self.get_queryset().count()
+            # Determine the count 
+            context['entrycount'] = self.entrycount #  self.get_queryset().count()
 
-        # Make sure the paginate-values are available
-        context['paginateValues'] = paginateValues
+            # Make sure the paginate-values are available
+            context['paginateValues'] = paginateValues
 
-        if 'paginate_by' in initial:
-            context['paginateSize'] = int(initial['paginate_by'])
-            self.paginate_by = int(initial['paginate_by'])
-        else:
-            context['paginateSize'] = self.paginate_by
+            if 'paginate_by' in initial:
+                context['paginateSize'] = int(initial['paginate_by'])
+                self.paginate_by = int(initial['paginate_by'])
+            else:
+                context['paginateSize'] = self.paginate_by
 
-        if self.bUseMijnen:
-            # Try to retain the choice for Mijn
-            if 'mijn' in initial:
-                mijn_id = int(initial['mijn'])
-                context['mijnkeuze'] = mijn_id
-                mijn_inst = Mijn.objects.filter(id=mijn_id).first()
-                if mijn_inst == None:
+            if self.bUseMijnen:
+                # Try to retain the choice for Mijn
+                if 'mijn' in initial:
+                    mijn_id = int(initial['mijn'])
+                    context['mijnkeuze'] = mijn_id
+                    mijn_inst = Mijn.objects.filter(id=mijn_id).first()
+                    if mijn_inst == None:
+                        context['mijnnaam'] = ''
+                    else:
+                        context['mijnnaam'] = mijn_inst.naam
+                else:
+                    context['mijnkeuze'] = 0
                     context['mijnnaam'] = ''
+
+            # Process and retain the choice for Aflevering
+            if 'aflevering' in initial and initial['aflevering'] != "":
+                context['aflkeuze'] = int(initial['aflevering'])
+                afl = Aflevering.objects.filter(id=context['aflkeuze']).first()
+                if afl == None:
+                    context['afl'] = ''
                 else:
-                    context['mijnnaam'] = mijn_inst.naam
+                    context['afl'] = afl.get_summary()
             else:
-                context['mijnkeuze'] = 0
-                context['mijnnaam'] = ''
-        # Process and retain the choice for Aflevering
-        if 'aflevering' in initial:
-            context['aflkeuze'] = int(initial['aflevering'])
-            afl = Aflevering.objects.filter(id=context['aflkeuze']).first()
-            if afl == None:
+                context['aflkeuze'] = 0
                 context['afl'] = ''
-            else:
-                context['afl'] = afl.get_summary()
-        else:
-            context['aflkeuze'] = 0
-            context['afl'] = ''
 
-        # Set the prefix
-        context['app_prefix'] = APP_PREFIX
+            # Set the prefix
+            context['app_prefix'] = APP_PREFIX
 
-        # Set the title of the application
-        context['title'] = "{} begrippen".format(THIS_DICTIONARY)
+            # Set the title of the application
+            context['title'] = "{} begrippen".format(THIS_DICTIONARY)
 
-        # Set the afleveringen that are available
-        context['afleveringen'] = [afl for afl in Aflevering.objects.all()]
-        context['mijnen'] = [mijn for mijn in Mijn.objects.all().order_by('naam')]
+            # Set the afleveringen that are available
+            context['afleveringen'] = [afl for afl in Aflevering.objects.all()]
+            context['mijnen'] = [mijn for mijn in Mijn.objects.all().order_by('naam')]
 
-        # Pass on the word-order boolean
-        context['order_word_toel'] = self.bOrderWrdToel
+            # Pass on the word-order boolean
+            context['order_word_toel'] = self.bOrderWrdToel
 
-        if self.bDoTime:
-            print("LemmaListView context part 1: {:.1f}".format( get_now_time() - iStart))
-            # Reset the time
-            iStart = get_now_time()
-
-        # If we are in 'strict' mode, we need to deliver the [qlist] and its subsidiaries
-        if self.strict:
-
-            # Transform the paginated queryset into a dict sorted by Dialect/Aflevering
-            lAflev = self.get_qafl(context)
             if self.bDoTime:
-                print("LemmaListView context get_qafl(): {:.1f}".format( get_now_time() - iStart))
+                print("LemmaListView context part 1: {:.1f}".format( get_now_time() - iStart))
                 # Reset the time
                 iStart = get_now_time()
 
-            lastDescr = None
-            # Get a list with 'first' and 'last' values for each item in the current paginated queryset
-            lEntry = self.get_qlist(context)
+            # If we are in 'strict' mode, we need to deliver the [qlist] and its subsidiaries
+            if self.strict:
+
+                # Transform the paginated queryset into a dict sorted by Dialect/Aflevering
+                lAflev = self.get_qafl(context)
+                if self.bDoTime:
+                    print("LemmaListView context get_qafl(): {:.1f}".format( get_now_time() - iStart))
+                    # Reset the time
+                    iStart = get_now_time()
+
+                lastDescr = None
+                # Get a list with 'first' and 'last' values for each item in the current paginated queryset
+                lEntry = self.get_qlist(context)
+                if self.bDoTime:
+                    print("LemmaListView context get_qlist(): {:.1f}".format( get_now_time() - iStart))
+                    # Reset the time
+                    iStart = get_now_time()
+
+                # Add the sorted-dialect information to lEntry
+                for idx, item in enumerate(lEntry):
+                    # Start or Finish dialect information
+                    if item['lemma_gloss']['first']:
+                        qsa = []
+                        # start a list of all lemma-descriptions taken from the entries belonging to one particular lemma
+                        lemma_descr_list = []
+                    # All: add this entry
+                    qsa.append(lAflev[idx])
+                    # If not already present: add description
+                    iDescrId = item['entry'].descr.id
+                    if iDescrId not in lemma_descr_list:
+                        lemma_descr_list.append(iDescrId)
+                    if item['lemma_gloss']['last']:
+                        # COpy the list of Entry elements sorted by Lemma/Aflevering here
+                        lEntry[idx]['alist'] = qsa
+                        # OLD: lEntry[idx]['dlist'] = self.get_qdescr(item['entry'])
+                        lEntry[idx]['dlist'] = self.get_qdescrlist(lemma_descr_list)
+                    else:
+                        lEntry[idx]['alist'] = None
+                        lEntry[idx]['dlist'] = None
+
+                context['qlist'] = lEntry
+            # Finish measuring context time
             if self.bDoTime:
-                print("LemmaListView context get_qlist(): {:.1f}".format( get_now_time() - iStart))
-                # Reset the time
-                iStart = get_now_time()
+                print("LemmaListView context: {:.1f}".format( get_now_time() - iStart))
 
-            # Add the sorted-dialect information to lEntry
-            for idx, item in enumerate(lEntry):
-                # Start or Finish dialect information
-                if item['lemma_gloss']['first']:
-                    qsa = []
-                    # start a list of all lemma-descriptions taken from the entries belonging to one particular lemma
-                    lemma_descr_list = []
-                # All: add this entry
-                qsa.append(lAflev[idx])
-                # If not already present: add description
-                iDescrId = item['entry'].descr.id
-                if iDescrId not in lemma_descr_list:
-                    lemma_descr_list.append(iDescrId)
-                if item['lemma_gloss']['last']:
-                    # COpy the list of Entry elements sorted by Lemma/Aflevering here
-                    lEntry[idx]['alist'] = qsa
-                    # OLD: lEntry[idx]['dlist'] = self.get_qdescr(item['entry'])
-                    lEntry[idx]['dlist'] = self.get_qdescrlist(lemma_descr_list)
-                else:
-                    lEntry[idx]['alist'] = None
-                    lEntry[idx]['dlist'] = None
-
-            context['qlist'] = lEntry
-        # Finish measuring context time
-        if self.bDoTime:
-            print("LemmaListView context: {:.1f}".format( get_now_time() - iStart))
-
-        # Set the method
-        context['method'] = "get"       # Alternative: "ajax"
+            # Set the method
+            context['method'] = "get"       # Alternative: "ajax"
+        except:
+            msg = oErr.get_error_message()
+            oErr.DoError("LemmaListView/get_context_data")
 
         # Return the calculated context
         return context
