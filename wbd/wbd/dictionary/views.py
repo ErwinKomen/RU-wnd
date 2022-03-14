@@ -40,7 +40,7 @@ paginateEntries = 100
 # OLD: paginateValues = (1000, 500, 250, 100, 50, 40, 30, 20, 10, )
 paginateValues = (100, 50, 20, 10, 5, 2, 1, )
 outputColumns = ['begrip', 'trefwoord', 'dialectopgave', 'Kloekecode', 'aflevering', 'bronnenlijst']
-rGarbage = re.compile(r'[^a-zA-Z0-9 -\#\[\]\?]')
+rGarbage = re.compile(r'[^a-zA-Z0-9 -\#\[\]\?\*]')
 
 THIS_DICTIONARY = "e-WBD"
 
