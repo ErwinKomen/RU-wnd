@@ -375,6 +375,10 @@ def do_repair_start(request):
         bResult = do_repair_kloeke(oRepair)
         if not bResult:
             data['status'] = "error"
+    elif sRepairType == "lprinted":
+        bResult = do_repair_lprinted(oRepair)
+        if not bResult:
+            data['status'] = "error"
 
     # Return this response
     return JsonResponse(data)

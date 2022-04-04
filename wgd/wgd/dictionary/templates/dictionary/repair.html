@@ -14,10 +14,11 @@
 
   <div class="row">
     <div class="col-md-3">
-      <span><a id="repair_start_lemma" class="btn btn-primary" 
-          repair-start="{% url 'repair_start' %}?repairtype=lemma" 
-          repair-progress="{% url 'repair_progress' %}?repairtype=lemma" 
-          onclick="repair_start('lemma')">Lemma's repareren</a>
+      <span>
+        <a id="repair_start_lemma" class="btn btn-primary"
+           repair-start="{% url 'repair_start' %}?repairtype=lemma"
+           repair-progress="{% url 'repair_progress' %}?repairtype=lemma"
+           onclick="repair_start('lemma')">Lemma's repareren</a>
       </span>
     </div>
     <div id="repair_progress_lemma" class="col-md-9">
@@ -27,7 +28,7 @@
 
   <h3>Reparatie van ENTRY en DESCRIPTION</h3>
   <div class="row">
-    Het repareren van Entry-Descriptions houdt in dat alle niet-unieke Descriptions worden verwijderd, 
+    Het repareren van Entry-Descriptions houdt in dat alle niet-unieke Descriptions worden verwijderd,
     en dat alle Entry instances naar de juiste Description instances verwijzen.
   </div>
 
@@ -35,10 +36,11 @@
 
   <div class="row">
     <div class="col-md-3">
-      <span><a id="repair_start_entrydescr" class="btn btn-primary" 
-          repair-start="{% url 'repair_start' %}?repairtype=entrydescr" 
-          repair-progress="{% url 'repair_progress' %}?repairtype=entrydescr" 
-          onclick="repair_start('entrydescr')">Entry/Descriptions repareren</a>
+      <span>
+        <a id="repair_start_entrydescr" class="btn btn-primary"
+           repair-start="{% url 'repair_start' %}?repairtype=entrydescr"
+           repair-progress="{% url 'repair_progress' %}?repairtype=entrydescr"
+           onclick="repair_start('entrydescr')">Entry/Descriptions repareren</a>
       </span>
     </div>
     <div id="repair_progress_entrydescr" class="col-md-9">
@@ -57,10 +59,11 @@
 
   <div class="row">
     <div class="col-md-3">
-      <span><a id="repair_start_clean" class="btn btn-primary" 
-          repair-start="{% url 'repair_start' %}?repairtype=clean" 
-          repair-progress="{% url 'repair_progress' %}?repairtype=clean" 
-          onclick="repair_start('clean')">Opschonen</a>
+      <span>
+        <a id="repair_start_clean" class="btn btn-primary"
+           repair-start="{% url 'repair_start' %}?repairtype=clean"
+           repair-progress="{% url 'repair_progress' %}?repairtype=clean"
+           onclick="repair_start('clean')">Opschonen</a>
       </span>
     </div>
     <div id="repair_progress_clean" class="col-md-9">
@@ -70,7 +73,7 @@
 
   <h3>Inlezen van Kloeke-Stad tabel (in principe eenmalig)</h3>
   <div class="row">
-    Met deze actie wordt de tabel 'Kloeke' ingelezen. 
+    Met deze actie wordt de tabel 'Kloeke' ingelezen.
     In deze tabel staat de vertaling van kloekecode naar stad (en evt alternatieve benamingen voor de stad).
     Wanneer deze actie wordt uitgevoerd terwijl de tabel al gevuld is, worden de definities bekeken en waar nodig aangepast.
     Er wordt met deze actie <b>geen</b> code verwijderd.
@@ -80,13 +83,35 @@
 
   <div class="row">
     <div class="col-md-3">
-      <span><a id="repair_start_kloeke" class="btn btn-primary" 
-          repair-start="{% url 'repair_start' %}?repairtype=kloeke" 
-          repair-progress="{% url 'repair_progress' %}?repairtype=kloeke" 
-          onclick="repair_start('kloeke')">Kloekecodes laden</a>
+      <span>
+        <a id="repair_start_kloeke" class="btn btn-primary"
+           repair-start="{% url 'repair_start' %}?repairtype=kloeke"
+           repair-progress="{% url 'repair_progress' %}?repairtype=kloeke"
+           onclick="repair_start('kloeke')">Kloekecodes laden</a>
       </span>
     </div>
     <div id="repair_progress_kloeke" class="col-md-9">
+      <!-- This is where the progress will be reported -->
+    </div>
+  </div>
+
+  <h3>Bekijken wat printed/electronic is</h3>
+  <div class="row">
+    Doorzoek de lemma's en kijk of een lemma helemaal printed, helemaal electronic of hybriede is.
+  </div>
+
+  <div class="row"><div>&nbsp;</div></div>
+
+  <div class="row">
+    <div class="col-md-3">
+      <span>
+        <a id="repair_start_lprinted" class="btn btn-primary"
+           repair-start="{% url 'repair_start' %}?repairtype=lprinted"
+           repair-progress="{% url 'repair_progress' %}?repairtype=lprinted"
+           onclick="repair_start('lprinted')">Lemma's printed/electronic'</a>
+      </span>
+    </div>
+    <div id="repair_progress_lprinted" class="col-md-9">
       <!-- This is where the progress will be reported -->
     </div>
   </div>

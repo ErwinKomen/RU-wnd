@@ -678,13 +678,17 @@ class Description(models.Model):
 class Lemma(models.Model):
     """Lemma"""
 
+    # [1] Each Lemma must have a gloss
     gloss = models.CharField("Gloss voor dit lemma", db_index=True, blank=False, max_length=MAX_LEMMA_LEN, default="(unknown)")
     # toelichting = models.TextField("Omschrijving van het lemma", blank=True)
     # bronnenlijst = models.TextField("Bronnenlijst bij dit lemma", db_index=True, blank=True)
     # boek = models.TextField("Boekaanduiding", db_index=True, null=True,blank=True)
-    lmdescr = models.ManyToManyField(Description, through='LemmaDescr')
-    # A field that indicates this item may be showed
+
+    # [1] A field that indicates this item may be showed
     toonbaar = models.BooleanField("Mag getoond worden", blank=False, default=True)
+
+    # Many-to-many fields
+    lmdescr = models.ManyToManyField(Description, through='LemmaDescr')
 
     class Meta:
         # Note: no index is possible, since lmdescr is many-to-many
@@ -754,6 +758,27 @@ class Lemma(models.Model):
         except:
             oErr.DoError("Lemma/get_instance error:")
             return None
+
+    def get_opname(self):
+        """Is this lemma taken up in the printed edition or not?"""
+
+        oErr = ErrHandle()
+        opname = ""
+        try:
+            entries = self.entry_set.all()
+            count_e = entries.count()
+            count_indict = entries.filter(inwoordenboek="true").count()
+            if count_indict == 0:
+                opname = "not"
+            elif count_indict == count_e:
+                opname = "yes"
+            else:
+                opname = "prt"
+        except:
+            msg = oErr.get_error_message()
+            oErr.DoError("get_opname")
+        return opname
+
 
     def change_toonbaar():
         # Set all lemma's to 'toonbaar
@@ -2860,6 +2885,29 @@ def do_repair_kloeke(oRepair):
         oRepair.set_status("Error: {}".format(msg))
         return False
 
+
+def do_repair_lprinted(oRepair):
+    """Check which lemma's are printed vs electronic (or hybrid)"""
+
+    oErr = ErrHandle()
+    try:
+        # Show we are starting
+        oRepair.set_status("Starting up reading Kloeke code TSV")
+
+        oCount = {} # dict(yes=0, not=0, prt=0)
+        oCount['yes'] = 0
+        oCount['not'] = 0
+        oCount['prt'] = 0
+        for lemma in Lemma.objects.all().order_by('id'):
+            opname = lemma.get_opname()
+            oCount[opname] += 1
+       
+        # Return positively
+        return True
+    except:
+        msg = oErr.get_error_message()
+        oRepair.set_status("Error: {}".format(msg))
+        return False
 
 
 # ----------------------------------------------------------------------------------
