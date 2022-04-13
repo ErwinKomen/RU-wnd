@@ -31,7 +31,8 @@
             {% spaceless %}
               {% if not order_word_toel and item.toelichting.first and item.entry.toelichting != "" %}<span class="lemma-word-toelichting">{{item.entry.toelichting}}</span>&nbsp;{% endif %}
               {% if item.dialectopgave.first  %}
-                <span class="lemma-word {% if order_word_toel and item.entry.toelichting != "" %}lemma-word-has-toelichting{% endif %}" 
+                <span class="lemma-word {% if order_word_toel and item.entry.toelichting != "" %}lemma-word-has-toelichting{% endif %}
+                      {% if item.entry.inwoordenboek == "false" %} lemma-word-electronic{% endif %}" 
                   {% if order_word_toel and item.entry.toelichting != "" %}title="{{item.entry.toelichting}}"{% endif %}
                   >{{item.entry.dialectopgave}}</span>
                 <span> (</span>

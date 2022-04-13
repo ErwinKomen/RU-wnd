@@ -1,4 +1,4 @@
-﻿{% extends "dictionary/layout.html" %}
+{% extends "dictionary/layout.html" %}
 
 {% block content %}
 
@@ -168,22 +168,23 @@
             {% spaceless %}
               {% if not order_word_toel and item.toelichting.first and item.entry.toelichting != "" %}<span class="lemma-word-toelichting">{{item.entry.toelichting}}</span>&nbsp;{% endif %}
               {% if item.dialectopgave.first  %}
-                <span class="lemma-word {% if order_word_toel and item.entry.toelichting != "" %}lemma-word-has-toelichting{% endif %}" 
+                <span class="lemma-word {% if order_word_toel and item.entry.toelichting != "" %}lemma-word-has-toelichting{% endif %}
+                            {% if item.entry.inwoordenboek == "false" %} lemma-word-electronic{% endif %}" 
                   {% if order_word_toel and item.entry.toelichting != "" %}title="{{item.entry.toelichting}}"{% endif %}
                   >{{item.entry.dialectopgave}}</span>
                 <span> (</span>
               {% endif %}
               {% if entry.dialect.nieuw != "Q000" %}
-              <span class="lemma-word-dialect{% if not item.dialectopgave.first %}-additional hidden{% endif %}">
-                <span class="lemma-word-dialect-code hidden">{{item.entry.dialect.nieuw}}</span>
-                <span class="lemma-word-dialect-space hidden">&nbsp;</span>
-                <span class="lemma-word-dialect-stad">{{item.entry.dialect.stad}}</span>
-                {% if item.entry.kloeketoelichting != "" %}&nbsp;<span class="word-kloeketoelichting">[{{item.entry.kloeketoelichting}}]</span>&nbsp;{% endif %}
-                <span>{% if not item.dialectopgave.last %}, {% endif %}</span>
-                {% if item.dialectopgave.first and not item.dialectopgave.last %}
-                  <span class="lemma-word-dialect-dots">...</span>
-                {% endif %}
-              </span>
+                <span class="lemma-word-dialect{% if not item.dialectopgave.first %}-additional hidden{% endif %}">
+                  <span class="lemma-word-dialect-code hidden">{{item.entry.dialect.nieuw}}</span>
+                  <span class="lemma-word-dialect-space hidden">&nbsp;</span>
+                  <span class="lemma-word-dialect-stad">{{item.entry.dialect.stad}}</span>
+                  {% if item.entry.kloeketoelichting != "" %}&nbsp;<span class="word-kloeketoelichting">[{{item.entry.kloeketoelichting}}]</span>&nbsp;{% endif %}
+                  <span>{% if not item.dialectopgave.last %}, {% endif %}</span>
+                  {% if item.dialectopgave.first and not item.dialectopgave.last %}
+                    <span class="lemma-word-dialect-dots">...</span>
+                  {% endif %}
+                </span>
               {% endif %}
               {% if item.entry.mijnlijst.count > 0 %}
                 <span class="word-mijn">{% if  item.entry.dialect.nieuw != "Q000"  %}&nbsp;{% endif %}[</span>

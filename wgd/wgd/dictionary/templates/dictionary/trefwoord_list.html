@@ -177,7 +177,7 @@
             {% spaceless %}
               {% if item.toelichting.first and entry.toelichting != "" %}<span class="lemma-word-toelichting">{{item.entry.toelichting}}</span>&nbsp;{% endif %}
               {% if item.dialectopgave.first  %}
-                <span class="lemma-word">{{item.entry.dialectopgave}}</span>
+                <span class="lemma-word {% if item.entry.inwoordenboek == "false" %}lemma-word-electronic{% endif %}">{{item.entry.dialectopgave}}</span>
                 <span> (</span>
               {% endif %}
               {% if item.entry.dialect.nieuw != "Q000" %}                
