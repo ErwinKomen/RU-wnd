@@ -232,7 +232,7 @@ def isNullOrEmptyOrInt(arPart, lstColumn):
     # When everything has been checked and there is no indication, return false
     return 0
 
-def isLineOkay(oLine):
+def isLineOkay(oLine, file_name):
     
     try:
         # Validate
@@ -250,6 +250,16 @@ def isLineOkay(oLine):
                 if v=="" or v=="NULL" or v.startswith('#') or v=="?" or v=="-" or v.isnumeric():
                     # Indicate where the error was
                     return iIdx
+        # issue #43: don't take up volkskundig
+        sLemma = oLine.get("lemma_name").lower()
+        sFile = file_name.lower()
+        if "volkskundig" in sLemma:
+            # Make sure to indicate where the 'error' was
+            return 15
+        elif "mens" in sFile or "wereld" in sFile:
+            if "-opm." in sLemma:
+                # Make sure we indicate what the 'error' was
+                return 16
 
         # When everything has been checked and there is no indication, return false
         return 0
@@ -1820,6 +1830,7 @@ class Processor():
     oRow = None             # The cells of one row
     oCol = {}               # Mapping of column name to number
     type = "excel"          # The type of object we have: 'excel', 'csv_a', 'csv_b'
+    error = []              # Any error should be put in here
     col_lemma = -1          # Lemmatitel
     col_vraagn = -1         # vraagnummer
     col_vraagt = -1         # tekst van de vraag
@@ -1878,16 +1889,67 @@ class Processor():
                         self.oCol["nederlands"] = idx
                     else:
                         self.oCol[col_name] = idx
+
             # Now extract the needed elements from oCol
-            self.col_lemma = self.oCol['lemmatitel']
+            if 'lemmatitel' in self.oCol:
+                self.col_lemma = self.oCol['lemmatitel']
+            elif 'lemma' in self.oCol:
+                self.col_lemma = self.oCol['lemma']
+            else:
+                self.error.append("WARNING: cannot find LEMMA field")
+                self.oErr.Status("WARNING: cannot find LEMMA field")
+            
             self.col_vraagn = self.oCol['vraagnummer']
-            self.col_vraagt = self.oCol['vraagtekst']
-            self.col_bron = self.oCol['bron']
-            self.col_kloeke = self.oCol['kloeke-code']
+
+            if 'vraagtekst' in self.oCol:
+                self.col_vraagt = self.oCol['vraagtekst']
+            elif 'vraag' in self.oCol:
+                self.col_vraagt = self.oCol['vraag']
+            else:
+                self.error.append("WARNING: cannot find VRAAG[tekst] field")
+                self.oErr.Status("WARNING: cannot find VRAAG[tekst] field")
+
+            # The [bron] should be taken, unless there is a "plaats", which surpasses it
+            if "plaats" in self.oCol:
+                self.col_bron = self.oCol['plaats']
+            elif "bron" in self.oCol:
+                self.col_bron = self.oCol['bron']
+            else:
+                self.error.append("WARNING: cannot find BRON field")
+                self.oErr.Status("WARNING: cannot find BRON field")
+
+            if 'kloekecode correct' in self.oCol:
+                self.col_kloeke = self.oCol['kloekecode correct']
+            elif 'kloekecode corr' in self.oCol:
+                self.col_kloeke = self.oCol['kloekecode corr']
+            elif 'kloeke-code' in self.oCol:
+                self.col_kloeke = self.oCol['kloeke-code']
+            else:
+                self.error.append("WARNING: cannot find KLOEKE-CODE field")
+                self.oErr.Status("WARNING: cannot find KLOEKE-CODE field")
+
             self.col_stand = self.oCol['standaardspelling']
-            self.col_dialw = self.oCol['dialectwoord']
+
+            if 'dialectwoord' in self.oCol:
+                self.col_dialw = self.oCol['dialectwoord']
+            elif 'dialectopgave' in self.oCol:
+                self.col_dialw = self.oCol['dialectopgave']
+            else:
+                self.error.append("WARNING: cannot find DIALECTOPGAVE field")
+                self.oErr.Status("WARNING: cannot find DIALECTOPGAVE field")
+
             self.col_indict = self.oCol['inwoordenboek']
-            self.col_opm = self.oCol['opmerkingen']
+
+            if 'opmerkingen' in self.oCol:
+                self.col_opm = self.oCol['opmerkingen']
+            elif 'opmerkingen informanten' in self.oCol:
+                self.col_opm = self.oCol['opmerkingen informanten']
+            elif 'opmerkingen informant(en)' in self.oCol:
+                self.col_opm = self.oCol['opmerkingen informant(en)']
+            else:
+                self.error.append("WARNING: cannot find OPMERKINGEN field")
+                self.oErr.Status("WARNING: cannot find OPMERKINGEN field")
+
             if 'studass' in self.oCol:
                 self.col_opmst = self.oCol['studass']
             if 'subvraagletter' in self.oCol:
@@ -2001,6 +2063,8 @@ class WgdProcessor(Processor):
 
                 # Some additional adaptations
                 oBack['dialect_nieuw'] = oBack['dialect_nieuw'].replace(" ", "")
+                if "Leeuwen" in oBack['dialect_stad']:
+                    oBack['dialect_stad'] = oBack['dialect_stad'].replace("Beneden-Beneden-Leeuwen", "Beneden-Leeuwen")
             # Return what was found
             return oBack
         except:
@@ -2094,6 +2158,7 @@ def excel_to_fixture(xlsx_file, iDeel, iSectie, iAflevering, iStatus, bUseDbase=
         iCounter = 0        # Loop counter for progress
         iRead = 0           # Number read correctly
         iSkipped = 0        # Number skipped
+        articles = ["ut", "un", "'t", "'n", "de", "het", "een"]
 
         # Prepare the entry object
         oEntry = fEntry()
@@ -2190,6 +2255,8 @@ def excel_to_fixture(xlsx_file, iDeel, iSectie, iAflevering, iStatus, bUseDbase=
                 # Speed-up storages
                 sLastLemma = ""    
                 sLastLemmaDescr = ""
+                sLastDialectKloeke = ""
+                sLastTrefwoord = ""
                 sLastTw = ""
                 sLastTwToel = ""
                 # Instances
@@ -2221,6 +2288,14 @@ def excel_to_fixture(xlsx_file, iDeel, iSectie, iAflevering, iStatus, bUseDbase=
                 iStarttime = get_now_time()
                 # Open the Excel file
                 oProc = WgdProcessor(xlsx_file)
+
+                # Check for errors
+                if len(oProc.error) > 0:
+                    # Need to stop
+                    iStop = 1
+                    oErr.DoError("There are errors")
+                    break
+
                 oTime['read'] = get_now_time() - iStarttime
                 iStartTime = get_now_time()
 
@@ -2236,14 +2311,25 @@ def excel_to_fixture(xlsx_file, iDeel, iSectie, iAflevering, iStatus, bUseDbase=
                     row = oProc.row
                     # Perform part-to-line
                     oLine = oProc.partToLine()
+
+                    # Issue #46: possible adaptation
+                    if oLine.get('trefwoord_name', '') == "" and \
+                       sLastLemma != "" and sLastTrefwoord != "" and sLastDialectKloeke != "" and \
+                       sLastLemma == oLine.get('lemma_name') and sLastDialectKloeke == oLine.get('dialect_kloeke'):
+                        # This means: trefwoord is empty, but we are in the same lemma and the same dialect
+                        oLine['trefwoord_name'] = sLastTrefwoord
+
                     # Check if this line contains 'valid' data:
-                    iValid = isLineOkay(oLine)
+                    iValid = isLineOkay(oLine, xlsx_file)
                     # IF this is the first line or an empty line, then skip
                     if iValid == 0:
                         # Assuming this 'part' is entering an ENTRY
 
                         # Make sure we got TREFWOORD correctly
                         sTrefWoord = oLine['trefwoord_name']
+
+                        # Keep the previous one
+                        sLastTrefwoord = sTrefWoord
 
                         if bDoMijnen and 'mijn_list' in oLine:
                             lMijnen = oLine['mijn_list']
@@ -2279,6 +2365,8 @@ def excel_to_fixture(xlsx_file, iDeel, iSectie, iAflevering, iStatus, bUseDbase=
                             else:
                                 iPkDialect = Dialect.get_item({'stad': oLine['dialect_stad'], 
                                                                 'nieuw': oLine['dialect_nieuw']}, oTime)
+                            if sLastDialectKloeke != oLine.get('dialect_kloeke'):
+                                sLastDialectKloeke = oLine.get('dialect_kloeke')
 
                             # Find out which trefwoord this is
                             sTwToel = oLine['trefwoord_toelichting']
@@ -2304,6 +2392,15 @@ def excel_to_fixture(xlsx_file, iDeel, iSectie, iAflevering, iStatus, bUseDbase=
 
                         # Process the ENTRY
                         sDialectWoord = oLine['dialectopgave_name']
+
+                        # Issue #43: strip off article if needed
+                        if "huis" in xlsx_file.lower():
+                            # Split word by spaces
+                            arWoord = sDialectWoord.split(" ")
+                            # Do we have more than one part?
+                            if len(arWoord) > 0 and arWoord[0].lower() in articles:
+                                sDialectWoord = " ".join(arWoord[1:])
+
                         # WGD-specific
                         sSubvraag = oLine['subvraag']
                         sInWoordenboek = "true" if oLine['inwoordenboek'] == "ja" else "false"
@@ -2338,6 +2435,16 @@ def excel_to_fixture(xlsx_file, iDeel, iSectie, iAflevering, iStatus, bUseDbase=
 
                         iRead += 1
                     else:
+                        # Still process lastlemma and lastdialectkloeke
+                        if oLine.get('lemma_name') != sLastLemma:
+                            sLastLemma = oLine.get('lemma_name')
+
+                        if sLastDialectKloeke != oLine.get('dialect_kloeke'):
+                            sLastDialectKloeke = oLine.get('dialect_kloeke')
+
+                        if sLastTrefwoord != oLine.get('trefwoord_name'):
+                            sLastTrefwoord = oLine.get('trefwoord_name')
+
                         # This line is being skipped
                         oSkip.append(oProc.line())
                         iSkipped += 1
