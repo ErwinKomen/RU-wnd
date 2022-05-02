@@ -159,6 +159,39 @@ def get_item_list(lVar, lFun, qs):
     # Return the list we have made
     return lItem
 
+def recude_dialect_stad(lEntry):
+
+    lReduced = []
+    oErr = ErrHandle()
+    try:
+        # Reduce the list, based on [dialect_stad]
+        bStadReduction = False
+        for oItem in lEntry:
+            # Check if we are inside a reduction
+            if bStadReduction and oItem['dialect_stad']['last']:
+                # We can now turn off reduction
+                bStadReduction = False
+                # Make sure we keep 'dialectopgave' up to date 
+                if len(lReduced) > 0:
+                    lReduced[-1]['dialectopgave']['last'] = oItem['dialectopgave']['last']
+            else:
+                # Check if we need to start reducing
+                if oItem['dialect_stad']['first']:
+                    if oItem['dialect_stad']['last']:
+                        # Simply copy
+                        lReduced.append(oItem)
+                    else:
+                        # Indicate this is the last one anyway
+                        oItem['dialect_stad']['last'] = True
+                        # Indicate we are starting to reduce
+                        bStadReduction = True
+                        # This one should be added
+                        lReduced.append(oItem)
+    except:
+        msg = oErr.get_error_message()
+        oErr.DoError("recude_dialect_stad")
+    return lReduced
+
 def csv_to_excel(sCsvData, response):
     """Convert CSV data to an Excel worksheet"""
 
@@ -880,6 +913,9 @@ class TrefwoordListView(ListView):
                 else:
                     lEntry[idx]['alist'] = None
 
+            # Now take the reduced list instead
+            lEntry = recude_dialect_stad(lEntry)
+
             context['qlist'] = lEntry
 
         # Return the calculated context
@@ -1380,6 +1416,9 @@ class LemmaListView(ListView):
                     else:
                         lEntry[idx]['alist'] = None
                         lEntry[idx]['dlist'] = None
+
+                # Now take the reduced list instead
+                lEntry = recude_dialect_stad(lEntry)
 
                 context['qlist'] = lEntry
             # Finish measuring context time
