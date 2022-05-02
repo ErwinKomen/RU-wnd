@@ -786,96 +786,107 @@ class TrefwoordListView(ListView):
         lstQ = []
         bHasSearch = False
         bHasFilter = False
+        qse = Entry.objects.none()
+        oErr = ErrHandle()
 
-        # Retrieve the set of trefwoorden from the page_obj
-        trefw_list = [item.id for item in page_obj]
-
-        # Initialize the filtering
-        lstQ.append(Q(trefwoord__id__in=trefw_list))
-
-        # Get the parameters passed on with the GET request
-        get = self.request.GET
-
-        # Check for aflevering being publishable
-        if self.strict:
-            lstQ.append(Q(aflevering__toonbaar=True))
-        else:
-            lstQ.append(Q(entry__aflevering__toonbaar=True))
-
-        # Check for dialectwoord
-        if 'dialectwoord' in get and get['dialectwoord'] != '':
-            val = adapt_search(get['dialectwoord'])
-            # Adapt Entry filter
-            if self.strict:
-                lstQ.append(Q(woord__iregex=val))
+        try:
+            if page_obj is None:
+                pass
             else:
-                lstQ.append(Q(entry__woord__iregex=val))
-            bHasFilter = True
 
-        # Check for lemma
-        if 'lemma' in get and get['lemma'] != '':
-            val = adapt_search(get['lemma'])
-            # Adapt Entry filter
-            if self.strict:
-                lstQ.append(Q(lemma__gloss__iregex=val))
-            else:
-                lstQ.append(Q(entry__lemma__gloss__iregex=val))
-            bHasFilter = True
+                # Retrieve the set of trefwoorden from the page_obj
+                trefw_list = [item.id for item in page_obj]
 
-        # Check for dialect city
-        if 'dialectCity' in get and get['dialectCity'] != '':
-            val = adapt_search(get['dialectCity'])
-            # Adapt Entry filter
-            if self.strict:
-                lstQ.append(Q(dialect__stad__iregex=val))
-            else:
-                lstQ.append(Q(entry__dialect__stad__iregex=val))
-            bHasFilter = True
+                # Initialize the filtering
+                lstQ.append(Q(trefwoord__id__in=trefw_list))
 
-        # Check for dialect code (Kloeke)
-        if 'dialectCode' in get and get['dialectCode'] != '':
-            val = adapt_search(get['dialectCode'])
-            # Adapt Entry filter
-            if self.strict:
-                lstQ.append(Q(dialect__nieuw__iregex=val))
-            else:
-                lstQ.append(Q(entry__dialect__nieuw__iregex=val))
-            bHasFilter = True
+                # Get the parameters passed on with the GET request
+                get = self.request.GET
 
-        # Check for aflevering
-        if 'aflevering' in get and get['aflevering'] != '':
-            # What we get should be a number
-            val = get['aflevering']
-            if val.isdigit():
-                iVal = int(val)
-                if iVal>0:
+                # Check for aflevering being publishable
+                if self.strict:
+                    lstQ.append(Q(aflevering__toonbaar=True))
+                else:
+                    lstQ.append(Q(entry__aflevering__toonbaar=True))
+
+                # Check for dialectwoord
+                if 'dialectwoord' in get and get['dialectwoord'] != '':
+                    val = adapt_search(get['dialectwoord'])
+                    # Adapt Entry filter
                     if self.strict:
-                        lstQ.append(Q(aflevering__id=iVal))
+                        lstQ.append(Q(woord__iregex=val))
                     else:
-                        lstQ.append(Q(entry__aflevering__id=iVal))
+                        lstQ.append(Q(entry__woord__iregex=val))
                     bHasFilter = True
 
-        # Check for mijn
-        if self.bUseMijnen and 'mijn' in get and get['mijn'] != '':
-            # What we get should be a number
-            val = get['mijn']
-            if val.isdigit():
-                iVal = int(val)
-                if iVal>0:
+                # Check for lemma
+                if 'lemma' in get and get['lemma'] != '':
+                    val = adapt_search(get['lemma'])
+                    # Adapt Entry filter
                     if self.strict:
-                        lstQ.append(Q(mijnlijst__id=iVal))
+                        lstQ.append(Q(lemma__gloss__iregex=val))
                     else:
-                        lstQ.append(Q(entry__mijnlijst__id=iVal))
+                        lstQ.append(Q(entry__lemma__gloss__iregex=val))
                     bHasFilter = True
 
-        # Order: "trefwoord_woord", "lemma_gloss", "dialectopgave", "dialect_stad"
-        # Make sure we apply the filter
-        qse = Entry.objects.filter(*lstQ).distinct().select_related().order_by(
-            Lower('trefwoord__woord'), 
-            'lemma__gloss',  
-            Lower('toelichting'),
-            Lower('woord'), 
-            Lower('dialect__stad'))
+                # Check for dialect city
+                if 'dialectCity' in get and get['dialectCity'] != '':
+                    val = adapt_search(get['dialectCity'])
+                    # Adapt Entry filter
+                    if self.strict:
+                        lstQ.append(Q(dialect__stad__iregex=val))
+                    else:
+                        lstQ.append(Q(entry__dialect__stad__iregex=val))
+                    bHasFilter = True
+
+                # Check for dialect code (Kloeke)
+                if 'dialectCode' in get and get['dialectCode'] != '':
+                    val = adapt_search(get['dialectCode'])
+                    # Adapt Entry filter
+                    if self.strict:
+                        lstQ.append(Q(dialect__nieuw__iregex=val))
+                    else:
+                        lstQ.append(Q(entry__dialect__nieuw__iregex=val))
+                    bHasFilter = True
+
+                # Check for aflevering
+                if 'aflevering' in get and get['aflevering'] != '':
+                    # What we get should be a number
+                    val = get['aflevering']
+                    if val.isdigit():
+                        iVal = int(val)
+                        if iVal>0:
+                            if self.strict:
+                                lstQ.append(Q(aflevering__id=iVal))
+                            else:
+                                lstQ.append(Q(entry__aflevering__id=iVal))
+                            bHasFilter = True
+
+                # Check for mijn
+                if self.bUseMijnen and 'mijn' in get and get['mijn'] != '':
+                    # What we get should be a number
+                    val = get['mijn']
+                    if val.isdigit():
+                        iVal = int(val)
+                        if iVal>0:
+                            if self.strict:
+                                lstQ.append(Q(mijnlijst__id=iVal))
+                            else:
+                                lstQ.append(Q(entry__mijnlijst__id=iVal))
+                            bHasFilter = True
+
+                # Order: "trefwoord_woord", "lemma_gloss", "dialectopgave", "dialect_stad"
+                # Make sure we apply the filter
+                qse = Entry.objects.filter(*lstQ).distinct().select_related().order_by(
+                    Lower('trefwoord__woord'), 
+                    'lemma__gloss',  
+                    Lower('toelichting'),
+                    Lower('woord'), 
+                    Lower('dialect__stad'))
+        except:
+            msg = oErr.get_error_message()
+            oErr.DoError("TrefwoordListView/get_queryset")
+
         self.qEntry = qse
         return qse
         
@@ -2032,7 +2043,7 @@ class DialectListView(ListView):
         # Make sure the paginate-values are available
         context['paginateValues'] = paginateValues
 
-        if 'paginate_by' in initial:
+        if 'paginate_by' in initial and initial['paginate_by'] != "":
             context['paginateSize'] = int(initial['paginate_by'])
         else:
             context['paginateSize'] = paginateSize
