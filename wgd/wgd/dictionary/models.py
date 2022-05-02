@@ -18,6 +18,7 @@ import openpyxl
 from openpyxl import Workbook
 from openpyxl.utils.cell import get_column_letter
 import os, os.path
+import copy
 import sys
 import io
 import codecs
@@ -267,6 +268,40 @@ def isLineOkay(oLine, file_name):
         sMsg = errHandle.get_error_message()
         errHandle.DoError("isLineOkay", True)
         return -1
+
+def isLineEqual(oLine, oPrevious):
+    """Check if [oLine] has the same information as [oPrevious]"""
+    
+    try:
+        # Validate
+        if oLine == None:
+            return -1
+        # Define which items need to be compared
+        lCheck = ['lemma_name', 'trefwoord_name', 'dialectopgave_name', 'dialect_nieuw', 'opmerking', 'dialectopgave_toelichting']
+        iIdx = 0
+        # Walk all keys
+        for k in lCheck:
+            # Does the one have the key
+            if k in oLine:
+                # Does the othe rhave the key?
+                if k in oPrevious:
+                    if oLine[k] != oPrevious[k]:
+                        return 0
+                else:
+                    # It's already a difference
+                    return 0
+            elif k in oPrevious:
+                # This is already a difference
+                return 0
+
+        # When everything has been checked and they are not different: signal this
+        return 20
+    except:
+        sMsg = errHandle.get_error_message()
+        errHandle.DoError("isLineEqual", True)
+        return -1
+
+
 
 
 # ----------------------------------------------------------------------------------
@@ -2088,16 +2123,20 @@ class WgdProcessor(Processor):
             return False
 
     def is_skippable(self):
-        """A row is skippable, if the first cell is empty, but the next cell is not"""
+        """A row is skippable, if the first cell is empty, but one of the next cells (up to 10) is not"""
 
+        columns = 10
         try:
             # Sanity checks
             if self.row < self.frow: return False
             if self.oRow == None: return False
 
             # Check SECOND cell
-            cell = self.oRow[1]
-            bValid = (cell.value != None and cell.value != "")
+            for idx in range(1,columns):
+                cell = self.oRow[idx]
+                if (cell.value != None and cell.value != ""):
+                    bValid = True
+                    break
             return bValid
         except:
             msg = self.oErr.get_error_message()
@@ -2282,6 +2321,8 @@ def excel_to_fixture(xlsx_file, iDeel, iSectie, iAflevering, iStatus, bUseDbase=
                 sLastTwToel = ""
                 # Instances
                 lemma_this = None
+                oLine = {}
+                oPrevious = {}
 
                 # The use of 'mijnen' depends on the dictionary we are working for (wld, wbd)
                 lMijnen = []
@@ -2340,7 +2381,9 @@ def excel_to_fixture(xlsx_file, iDeel, iSectie, iAflevering, iStatus, bUseDbase=
                     else:
                         # Get the row number
                         row = oProc.row
+
                         # Perform part-to-line
+                        oPrevious = copy.copy(oLine)
                         oLine = oProc.partToLine()
 
                         # Issue #46: possible adaptation
@@ -2352,6 +2395,11 @@ def excel_to_fixture(xlsx_file, iDeel, iSectie, iAflevering, iStatus, bUseDbase=
 
                         # Check if this line contains 'valid' data:
                         iValid = isLineOkay(oLine, xlsx_file)
+
+                        # Check if this contains the same information as the previous one
+                        if iValid == 0:
+                            iValid = isLineEqual(oLine, oPrevious)
+
                         # IF this is the first line or an empty line, then skip
                         if iValid == 0:
                             # Assuming this 'part' is entering an ENTRY
