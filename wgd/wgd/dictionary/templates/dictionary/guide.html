@@ -12,6 +12,7 @@
     <h4>Zoeken</h4>
     <p>Vanuit het hoofdmenu kan in het vakje 'Begrip' snel naar een begrip gezocht worden.
     Daarbij kan gebruik gemaakt worden van de symbolen * (nul of meer willekeurige tekens) of ? (één willekeurig teken).
+    Het symbool # kan gebruikt worden om naar een woord te zoeken binnen een begrip (<code>are#</code> geeft alle begrippen met 'are'). 
     Door uit de menu-optie 'Zoeken' te kiezen voor 'Begrippen', 'Plaatsen' of 'Trefwoorden' ontstaan er de volgende drie zoekmogelijkheden:
       <ol>
         <li><b>Begrippen</b> - zoek naar één of meer begrippen en geef per begrip alle dialectwoorden, ingedeeld naar trefwoord.</li>
@@ -22,6 +23,10 @@
         <li><b>Trefwoorden</b> - zoek naar één of meer trefwoorden en geef de gevonden dialectwoorden onderverdeeld per begrip.</li>
       </ol>
     </p>
+    <p>
+      <b>TIP:</b> Mocht u een begrip niet kunnen vinden, probeer het dan met een hekje erachter.
+    </p>
+
     <h4>Dialectweergave</h4>
     <p>De dialecten waarin de dialectopgaven voorkomen kunnen op verschillende manieren worden weergegeven.
     Standaard wordt alleen de plaatsnaam (<code>Plaats</code>) weergegeven. 
@@ -30,39 +35,26 @@
     </p>
     <p>Wanneer een dialectopgave identiek is voor meerdere dialecten, dan wordt de eerste plaats standaard gevolgd door een komma en drie punten:</p>
     <div>
-      <span class="lemma-trefwoord"><a href="/trefwoord/search/?search=beter%20met%20iemand%20zijn">beter met iemand zijn</a>:</span>
-      <span class="lemma-word">en ’t soŏ bĕetər meĕm zen</span>
-      <span>(</span>
-      <span class="lemma-word-dialect">
-        <span class="lemma-word-dialect-code hidden">L205p</span>
-        <span class="lemma-word-dialect-space hidden">&nbsp;</span>
-        <span class="lemma-word-dialect-stad">Aarle</span>
-        <span>, </span>
-        <span class="lemma-word-dialect-dots">...</span>
-      </span>
+      <span class="lemma-trefwoord"><a href="/trefwoord/search/?search=melkvet">melkvet</a>:</span>
+      <span class="lemma-word lemma-word-electronic">melkvet</span>
+      <span> (</span><span class="lemma-word-dialect"><span class="lemma-word-dialect-code hidden">F175p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Loenen</span><span>, </span><span class="lemma-word-dialect-dots">...</span></span>
+      <span class="lemma-word-dialect-additional hidden"><span class="lemma-word-dialect-code hidden">L027a</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Velp</span><span>, </span></span>
+      <span class="lemma-word-dialect-additional hidden"><span class="lemma-word-dialect-code hidden">F104p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Wapenveld</span><span>, </span></span>
+      <span class="lemma-word-dialect-additional hidden"><span class="lemma-word-dialect-code hidden">F102a</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Wezep</span></span>
       <span>)</span>
     </div>
     <p></p>
     <p>Om <em>alle</em> plaatsen te zien waar deze dialectopgave gesproken wordt kan bovenin het scherm de optie <code>Dialectlijst</code> worden aangevinkt.
     Dan verschijnen alle opties:</p>
     <div>
-      <span class="lemma-trefwoord"><a href="/trefwoord/search/?search=beter%20met%20iemand%20zijn">beter met iemand zijn</a>:</span>
-      <span class="lemma-word">en ’t soŏ bĕetər meĕm zen</span>
-      <span>(</span>
-      <span class="lemma-word-dialect">
-        <span class="lemma-word-dialect-code hidden">L205p</span>
-        <span class="lemma-word-dialect-space hidden">&nbsp;</span>
-        <span class="lemma-word-dialect-stad">Aarle</span>
-        <span>, </span>
-        <span class="lemma-word-dialect-dots hidden">...</span>
-      </span>
-      <span class="lemma-word-dialect-additional">
-        <span class="lemma-word-dialect-code hidden">L206p</span>
-        <span class="lemma-word-dialect-space hidden">&nbsp;</span>
-        <span class="lemma-word-dialect-stad">Rixtel</span>
-        <span></span>
-      </span>
+      <span class="lemma-trefwoord"><a href="/trefwoord/search/?search=melkvet">melkvet</a>:</span>
+      <span class="lemma-word lemma-word-electronic">melkvet</span>
+      <span> (</span><span class="lemma-word-dialect"><span class="lemma-word-dialect-code hidden">F175p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Loenen</span><span>, </span><span class="lemma-word-dialect-dots hidden">...</span></span>
+      <span class="lemma-word-dialect-additional"><span class="lemma-word-dialect-code hidden">L027a</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Velp</span><span>, </span></span>
+      <span class="lemma-word-dialect-additional"><span class="lemma-word-dialect-code hidden">F104p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Wapenveld</span><span>, </span></span>
+      <span class="lemma-word-dialect-additional"><span class="lemma-word-dialect-code hidden">F102a</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Wezep</span></span>
       <span>)</span>
+
     </div>
 
     <h4>Overzichten</h4>
@@ -92,38 +84,84 @@
       <div class="panel-heading" data-toggle="collapse">
         <span>Filteren...</span>
         <span class="filter-summary">
-          <span class="filter-item">woord=c*</span>
+          <span class="filter-item">woord=k*</span>
           <span class="filter-item">plaats=b*</span>
-          <span class="filter-item">aflevering=II-4</span>
+          <span class="filter-item">aflevering=II-1</span>
         </span>
       </div>
     </div>
-    <p>Het bovenstaande filter geeft aan dat de dialectopgave moet beginnen met de letter 'c', 
+    <p>Het bovenstaande filter geeft aan dat de dialectopgave moet beginnen met de letter 'k', 
     dat de plaatsnaam moet beginnen met de letter 'b', 
-    en dat de dialectopgaven beperkt moeten zijn tot diegenen die voorkomen in deel II, aflevering 4.</p>
+    en dat de dialectopgaven beperkt moeten zijn tot diegenen die voorkomen in deel II, vragenlijst 1.</p>
     <h4>Kleuren en coderingen</h4>
     <p>Er worden in het {{dic_abbr}} een aantal verschillende kleurcoderingen gebruikt. De meeste daarvan spreken voor zichzelf.
     Hieronder een voorbeeld van kleurcoderingen waar enige uitleg bij gegeven kan worden:</p>
     <div class="row">
-    <div class="col-md-10 col-md-offset-1">
-      {% spaceless %}
-      <span class="lemma-trefwoord"><a href="/trefwoord/search/?search=waaier">waaier</a>:</span>
-      <span class="lemma-word-toelichting"></span>&nbsp;
-      <span class="lemma-word">wèèjǝr</span><span> (</span><span class="lemma-word-dialect"><span class="lemma-word-dialect-code hidden">L256p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Aalst</span><span>, </span><span class="lemma-word-dialect-dots">...</span></span>
-      <span class="lemma-word-dialect-additional hidden"><span class="lemma-word-dialect-code hidden">L225p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Zeelst</span><span></span></span><span>)</span><span>, </span>
-      <span class="lemma-word">wèèr</span><span> (</span><span class="lemma-word-dialect"><span class="lemma-word-dialect-code hidden">L207p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Gemert</span><span></span></span><span>)</span><span>, </span>
-      <span class="lemma-word-toelichting">(of: wèèjǝr?)</span>&nbsp;
-      <span class="lemma-word">wáájǝr</span><span> (</span><span class="lemma-word-dialect"><span class="lemma-word-dialect-code hidden">K172p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Boxtel</span>
-      &nbsp;<span class="word-kloeketoelichting">[Van Bakel]</span>&nbsp;
-      <span></span></span><span>)</span><span>, </span>
-      <span class="lemma-word-toelichting">waaier, dienende om het pas gesterkte kettinggaren mee droog te waaien (bladzijde 28), v.d. Ven - Vos</span>&nbsp;
-      <span class="lemma-word">wèèjǝr</span><span> (</span><span class="lemma-word-dialect"><span class="lemma-word-dialect-code hidden">L207p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Gemert</span><span></span></span><span>)</span>
-      {% endspaceless %}
-    </div>
+      <div class="col-md-10 col-md-offset-1">
+        <span class="lemma-trefwoord"><a href="/trefwoord/search/?search=weps">weps</a>:</span>
+        <span class="lemma-word lemma-word-electronic">weps</span><span> (</span>
+        <span class="lemma-word-dialect"><span class="lemma-word-dialect-code hidden">L089p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Alphen</span><span>, </span><span class="lemma-word-dialect-dots">...</span></span>
+        <span class="lemma-word-dialect-additional hidden"><span class="lemma-word-dialect-code hidden">K076p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Asperen</span><span>, </span></span>
+        <span class="lemma-word-dialect-additional hidden"><span class="lemma-word-dialect-code hidden">F122p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Ermelo</span><span>, </span></span>
+        <span class="lemma-word-dialect-additional hidden"><span class="lemma-word-dialect-code hidden">K072p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Leerbroek</span><span>, </span></span>
+        <span class="lemma-word-dialect-additional hidden"><span class="lemma-word-dialect-code hidden">L075p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Millingen aan de Rijn</span><span>, </span></span>
+        <span class="lemma-word-dialect-additional hidden"><span class="lemma-word-dialect-code hidden">F124p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Putten</span><span>, </span></span>
+        <span class="lemma-word-dialect-additional hidden"><span class="lemma-word-dialect-code hidden">K075a</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Spijk</span><span></span></span>
+        <span>)</span><span>, </span>
+        <span class="lemma-word-toelichting">Tiels, wips = Ophemerts</span>&nbsp;
+        <span class="lemma-word
+                             lemma-word-electronic">weps</span><span> (</span><span class="lemma-word-dialect"><span class="lemma-word-dialect-code hidden">L044p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Tiel</span><span></span></span><span>)</span><span>, </span>
+        <span class="lemma-trefwoord"><a href="/trefwoord/search/?search=wepse">wepse</a>:</span>
+        <span class="lemma-word
+                            ">un wepse</span><span> (</span><span class="lemma-word-dialect"><span class="lemma-word-dialect-code hidden">F115p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Oene</span><span></span></span><span>)</span><span>, </span>
+        <span class="lemma-word
+                            ">wepse</span><span> (</span><span class="lemma-word-dialect"><span class="lemma-word-dialect-code hidden">F151p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Apeldoorn</span><span>, </span><span class="lemma-word-dialect-dots">...</span></span>
+        <span class="lemma-word-dialect-additional hidden"><span class="lemma-word-dialect-code hidden">F129b</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Emst</span><span>, </span></span>
+        <span class="lemma-word-dialect-additional hidden"><span class="lemma-word-dialect-code hidden">F112p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Epe</span><span>, </span></span>
+        <span class="lemma-word-dialect-additional hidden"><span class="lemma-word-dialect-code hidden">F103p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Hattem</span><span>, </span></span>
+        <span class="lemma-word-dialect-additional hidden"><span class="lemma-word-dialect-code hidden">F113p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Heerde</span><span>, </span></span>
+        <span class="lemma-word-dialect-additional hidden"><span class="lemma-word-dialect-code hidden">F175p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Loenen</span><span>, </span></span>
+        <span class="lemma-word-dialect-additional hidden"><span class="lemma-word-dialect-code hidden">F111p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Nunspeet</span><span>, </span></span>
+        <span class="lemma-word-dialect-additional hidden"><span class="lemma-word-dialect-code hidden">F115p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Oene</span><span>, </span></span>
+        <span class="lemma-word-dialect-additional hidden"><span class="lemma-word-dialect-code hidden">F129p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Vaassen</span><span></span></span>
+        <span>)</span><span>, </span>
+        <span class="lemma-word
+                            ">wepse.?</span><span> (</span><span class="lemma-word-dialect"><span class="lemma-word-dialect-code hidden">F151p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Apeldoorn</span><span></span></span><span>)</span><span>, </span>
+        <span class="lemma-trefwoord"><a href="/trefwoord/search/?search=wesp">wesp</a>:</span>
+        <span class="lemma-word
+                             lemma-word-electronic">wesp</span><span> (</span><span class="lemma-word-dialect"><span class="lemma-word-dialect-code hidden">L026a</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Angeren</span><span>, </span><span class="lemma-word-dialect-dots">...</span></span>
+        <span class="lemma-word-dialect-additional hidden"><span class="lemma-word-dialect-code hidden">K039p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Culemborg</span><span>, </span></span>
+        <span class="lemma-word-dialect-additional hidden"><span class="lemma-word-dialect-code hidden">L054c</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Deest</span><span>, </span></span>
+        <span class="lemma-word-dialect-additional hidden"><span class="lemma-word-dialect-code hidden">L064p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Ewijk</span><span>, </span></span>
+        <span class="lemma-word-dialect-additional hidden"><span class="lemma-word-dialect-code hidden">F143p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Hoevelaken</span><span>, </span></span>
+        <span class="lemma-word-dialect-additional hidden"><span class="lemma-word-dialect-code hidden">E127p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Huizen</span><span>, </span></span>
+        <span class="lemma-word-dialect-additional hidden"><span class="lemma-word-dialect-code hidden">L075p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Millingen aan de Rijn</span><span>, </span></span>
+        <span class="lemma-word-dialect-additional hidden"><span class="lemma-word-dialect-code hidden">L008p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Rhenen</span><span>, </span></span>
+        <span class="lemma-word-dialect-additional hidden"><span class="lemma-word-dialect-code hidden">L064a</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Winssen</span><span></span></span><span>)</span><span>, </span>
+        <span class="lemma-trefwoord"><a href="/trefwoord/search/?search=wespe">wespe</a>:</span>
+        <span class="lemma-word
+                            ">wespe</span><span> (</span><span class="lemma-word-dialect"><span class="lemma-word-dialect-code hidden">F100p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Elburg</span><span>, </span><span class="lemma-word-dialect-dots">...</span></span>
+        <span class="lemma-word-dialect-additional hidden"><span class="lemma-word-dialect-code hidden">F126p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Elspeet</span><span>, </span></span>
+        <span class="lemma-word-dialect-additional hidden"><span class="lemma-word-dialect-code hidden">F103p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Hattem</span><span>, </span></span>
+        <span class="lemma-word-dialect-additional hidden"><span class="lemma-word-dialect-code hidden">F115p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Oene</span><span>, </span></span>
+        <span class="lemma-word-dialect-additional hidden"><span class="lemma-word-dialect-code hidden">F129p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Vaassen</span><span></span></span><span>)</span><span>, </span>
+        <span class="lemma-trefwoord"><a href="/trefwoord/search/?search=wezzep">wezzep</a>:</span>
+        <span class="lemma-word
+                             lemma-word-electronic">wèzep</span><span> (</span><span class="lemma-word-dialect"><span class="lemma-word-dialect-code hidden">L108p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Balgoij</span><span></span></span><span>)</span><span>, </span>
+        <span class="lemma-trefwoord"><a href="/trefwoord/search/?search=wieps">wieps</a>:</span>
+        <span class="lemma-word
+                             lemma-word-electronic">'n wieps</span><span> (</span><span class="lemma-word-dialect"><span class="lemma-word-dialect-code hidden">L070p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Gendt</span><span></span></span><span>)</span><span>, </span>
+        <span class="lemma-word
+                             lemma-word-electronic">wieps</span><span> (</span><span class="lemma-word-dialect"><span class="lemma-word-dialect-code hidden">L069p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Bemmel</span><span></span></span><span>)</span><span>, </span>
+        <span class="lemma-trefwoord"><a href="/trefwoord/search/?search=wips">wips</a>:</span>
+        <span class="lemma-word
+                             lemma-word-electronic">Wips</span><span> (</span><span class="lemma-word-dialect"><span class="lemma-word-dialect-code hidden">L051p</span><span class="lemma-word-dialect-space hidden">&nbsp;</span><span class="lemma-word-dialect-stad">Ochten</span><span></span></span><span>)</span>
+        
+      </div>
       </div>
     <p></p>
     <p>Een opmerking of toelichting die geldig is voor één of meerdere daaropvolgende dialectopgaven wordt afgebeeld met een lichtgele achtergrond.
-    Een opmerking of toelichting die uitsluitend betrekking heeft op één plaats staat tussen blokhaken en heeft een lichtblauwe achtergrond.
+    Een opmerking of toelichting die uitsluitend betrekking heeft op één plaats staat tussen blokhaken en heeft een lichtblauwe achtergrond (dit komt in het e-WGD niet voor).
     Een dialectopgave die niet in het gedrukte woordenboek voorkomt maar wel in het electronische heeft een <span class="lemma-word-electronic">groene kleur</span>.
     </p>
   </div>
