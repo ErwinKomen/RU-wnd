@@ -1,6 +1,7 @@
 {% extends "dictionary/layout.html" %}
 
 {% load static %}
+{% load humanize %}
 
 {% block content %}
 
@@ -52,7 +53,8 @@
         Kloekecodes ook nieuwe Kloekecodes; in de zoekapplicatie wordt alleen de nieuwe Kloekecode getoond.
       </p>
       <p>
-        Het e-WGD bevat 2.766 begrippen, 37.619 trefwoorden en 145.338 dialectopgaven, verzameld in 110 Gelderse plaatsen 
+        Het e-WGD bevat {{count_lemma|intcomma}} begrippen, {{count_trefwoord|intcomma}} trefwoorden en {{count_entry|intcomma}} dialectopgaven, 
+        verzameld in {{count_dialect}} Gelderse plaatsen 
         ofwel dialecten (iedere plaats vertegenwoordigt een eigen dialect).
       </p>
       <p>

@@ -231,14 +231,23 @@ def csv_to_excel(sCsvData, response):
 def home(request):
     """Renders the home page."""
     assert isinstance(request, HttpRequest)
-    return render(
-        request,
-        'dictionary/index.html',
-        {
-            'title': THIS_DICTIONARY,
-            'year':datetime.now().year,
-        }
-    )
+    template_name = "dictionary/index.html"
+
+    context = dict(title=THIS_DICTIONARY, year=datetime.now().year)
+
+    # Calculate the counts
+    count_dialect = Dialect.objects.count()
+    count_lemma = Lemma.objects.count()
+    count_trefwoord = Trefwoord.objects.count()
+    count_entry = Entry.objects.count()
+    context['count_dialect'] = count_dialect
+    context['count_lemma'] = count_lemma
+    context['count_trefwoord'] = count_trefwoord
+    context['count_entry'] = count_entry
+    
+    response = render( request,template_name, context)
+    # Return the response
+    return response
 
 def contact(request):
     """Renders the contact page."""
