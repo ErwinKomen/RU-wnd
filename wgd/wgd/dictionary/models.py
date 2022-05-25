@@ -18,6 +18,7 @@ import openpyxl
 from openpyxl import Workbook
 from openpyxl.utils.cell import get_column_letter
 import os, os.path
+import copy
 import sys
 import io
 import codecs
@@ -267,6 +268,40 @@ def isLineOkay(oLine, file_name):
         sMsg = errHandle.get_error_message()
         errHandle.DoError("isLineOkay", True)
         return -1
+
+def isLineEqual(oLine, oPrevious):
+    """Check if [oLine] has the same information as [oPrevious]"""
+    
+    try:
+        # Validate
+        if oLine == None:
+            return -1
+        # Define which items need to be compared
+        lCheck = ['lemma_name', 'trefwoord_name', 'dialectopgave_name', 'dialect_nieuw', 'opmerking', 'dialectopgave_toelichting']
+        iIdx = 0
+        # Walk all keys
+        for k in lCheck:
+            # Does the one have the key
+            if k in oLine:
+                # Does the othe rhave the key?
+                if k in oPrevious:
+                    if oLine[k] != oPrevious[k]:
+                        return 0
+                else:
+                    # It's already a difference
+                    return 0
+            elif k in oPrevious:
+                # This is already a difference
+                return 0
+
+        # When everything has been checked and they are not different: signal this
+        return 20
+    except:
+        sMsg = errHandle.get_error_message()
+        errHandle.DoError("isLineEqual", True)
+        return -1
+
+
 
 
 # ----------------------------------------------------------------------------------
@@ -2074,15 +2109,40 @@ class WgdProcessor(Processor):
 
     def is_valid(self):
         try:
+            # Sanity checks
             if self.row < self.frow: return False
             if self.oRow == None: return False
+
+            # Check first cell
             cell = self.oRow[0]
             bValid = (cell.value != None and cell.value != "")
             return bValid
         except:
             msg = self.oErr.get_error_message()
-            self.oErr.DoError("Processor.line() error")
+            self.oErr.DoError("Processor.is_valid() error")
             return False
+
+    def is_skippable(self):
+        """A row is skippable, if the first cell is empty, but one of the next cells (up to 10) is not"""
+
+        columns = 10
+        try:
+            # Sanity checks
+            if self.row < self.frow: return False
+            if self.oRow == None: return False
+
+            # Check SECOND cell
+            for idx in range(1,columns):
+                cell = self.oRow[idx]
+                if (cell.value != None and cell.value != ""):
+                    bValid = True
+                    break
+            return bValid
+        except:
+            msg = self.oErr.get_error_message()
+            self.oErr.DoError("Processor.is_skippable() error")
+            return False
+
 
 
    
@@ -2261,6 +2321,8 @@ def excel_to_fixture(xlsx_file, iDeel, iSectie, iAflevering, iStatus, bUseDbase=
                 sLastTwToel = ""
                 # Instances
                 lemma_this = None
+                oLine = {}
+                oPrevious = {}
 
                 # The use of 'mijnen' depends on the dictionary we are working for (wld, wbd)
                 lMijnen = []
@@ -2303,162 +2365,179 @@ def excel_to_fixture(xlsx_file, iDeel, iSectie, iAflevering, iStatus, bUseDbase=
                 while not bEnd:
                     # Read the row
                     oRow = oProc.next_row()
+                    bSkipping = False
+
                     # Check if row is valid
                     if not oProc.is_valid():
-                        bEnd = True
-                        break
-                    # Get the row number
-                    row = oProc.row
-                    # Perform part-to-line
-                    oLine = oProc.partToLine()
+                        # Check whether we may skip this
+                        if oProc.is_skippable():
+                            bSkipping = True
+                        else:
+                            bEnd = True
+                            break
 
-                    # Issue #46: possible adaptation
-                    if oLine.get('trefwoord_name', '') == "" and \
-                       sLastLemma != "" and sLastTrefwoord != "" and sLastDialectKloeke != "" and \
-                       sLastLemma == oLine.get('lemma_name') and sLastDialectKloeke == oLine.get('dialect_kloeke'):
-                        # This means: trefwoord is empty, but we are in the same lemma and the same dialect
-                        oLine['trefwoord_name'] = sLastTrefwoord
+                    if bSkipping:
+                        oErr.Status("Skipping one row")
+                    else:
+                        # Get the row number
+                        row = oProc.row
 
-                    # Check if this line contains 'valid' data:
-                    iValid = isLineOkay(oLine, xlsx_file)
-                    # IF this is the first line or an empty line, then skip
-                    if iValid == 0:
-                        # Assuming this 'part' is entering an ENTRY
+                        # Perform part-to-line
+                        oPrevious = copy.copy(oLine)
+                        oLine = oProc.partToLine()
 
-                        # Make sure we got TREFWOORD correctly
-                        sTrefWoord = oLine['trefwoord_name']
+                        # Issue #46: possible adaptation
+                        if oLine.get('trefwoord_name', '') == "" and \
+                           sLastLemma != "" and sLastTrefwoord != "" and sLastDialectKloeke != "" and \
+                           sLastLemma == oLine.get('lemma_name') and sLastDialectKloeke == oLine.get('dialect_kloeke'):
+                            # This means: trefwoord is empty, but we are in the same lemma and the same dialect
+                            oLine['trefwoord_name'] = sLastTrefwoord
 
-                        # Keep the previous one
-                        sLastTrefwoord = sTrefWoord
+                        # Check if this line contains 'valid' data:
+                        iValid = isLineOkay(oLine, xlsx_file)
 
-                        if bDoMijnen and 'mijn_list' in oLine:
-                            lMijnen = oLine['mijn_list']
+                        # Check if this contains the same information as the previous one
+                        if iValid == 0:
+                            iValid = isLineEqual(oLine, oPrevious)
 
-                        # Try to do all of this within one actual transation
-                        iStarttime = get_now_time()
-                        with transaction.atomic():
-                            # Find out which lemma this is
-                            sLemma = oLine['lemma_name']
-                            if sLemma != sLastLemma:
-                                lemma_this = Lemma.get_instance({'gloss': sLemma}, oTime)
-                                sLastLemma = sLemma
+                        # IF this is the first line or an empty line, then skip
+                        if iValid == 0:
+                            # Assuming this 'part' is entering an ENTRY
 
-                            # Find out which lemma-description this is
-                            descr_this = Description.get_instance({'bronnenlijst': oLine['lemma_bronnenlijst'],
-                                                                'toelichting': oLine['lemma_toelichting'], 
-                                                                'boek': oLine['lemma_boek']}, descr_this, oTime)
+                            # Make sure we got TREFWOORD correctly
+                            sTrefWoord = oLine['trefwoord_name']
 
-                            # We do need the PKs of the lemma and the description
-                            iPkLemma = lemma_this.pk
-                            iPkDescr = descr_this.pk
+                            # Keep the previous one
+                            sLastTrefwoord = sTrefWoord
 
-                            # Add the [iPkDescr] to the LemmaDescr--but only if it is not already there
-                            iPkLemmaDescr = LemmaDescr.get_item({'lemma': lemma_this,
-                                                                    'description': descr_this}, oTime)
+                            if bDoMijnen and 'mijn_list' in oLine:
+                                lMijnen = oLine['mijn_list']
 
-                            # Find out which dialect this is
-                            if oLine['dialect_kloeke'] != None and oLine['dialect_kloeke'] != "":
-                                iPkDialect = Dialect.get_item({'stad': oLine['dialect_stad'], 
-                                                                'nieuw': oLine['dialect_nieuw'],
-                                                                'code': oLine['dialect_kloeke']}, oTime)
-                                # Note: removed 'dialect_toelichting' in accordance with issue #22 of WLD
-                            else:
-                                iPkDialect = Dialect.get_item({'stad': oLine['dialect_stad'], 
-                                                                'nieuw': oLine['dialect_nieuw']}, oTime)
+                            # Try to do all of this within one actual transation
+                            iStarttime = get_now_time()
+                            with transaction.atomic():
+                                # Find out which lemma this is
+                                sLemma = oLine['lemma_name']
+                                if sLemma != sLastLemma:
+                                    lemma_this = Lemma.get_instance({'gloss': sLemma}, oTime)
+                                    sLastLemma = sLemma
+
+                                # Find out which lemma-description this is
+                                descr_this = Description.get_instance({'bronnenlijst': oLine['lemma_bronnenlijst'],
+                                                                    'toelichting': oLine['lemma_toelichting'], 
+                                                                    'boek': oLine['lemma_boek']}, descr_this, oTime)
+
+                                # We do need the PKs of the lemma and the description
+                                iPkLemma = lemma_this.pk
+                                iPkDescr = descr_this.pk
+
+                                # Add the [iPkDescr] to the LemmaDescr--but only if it is not already there
+                                iPkLemmaDescr = LemmaDescr.get_item({'lemma': lemma_this,
+                                                                        'description': descr_this}, oTime)
+
+                                # Find out which dialect this is
+                                if oLine['dialect_kloeke'] != None and oLine['dialect_kloeke'] != "":
+                                    iPkDialect = Dialect.get_item({'stad': oLine['dialect_stad'], 
+                                                                    'nieuw': oLine['dialect_nieuw'],
+                                                                    'code': oLine['dialect_kloeke']}, oTime)
+                                    # Note: removed 'dialect_toelichting' in accordance with issue #22 of WLD
+                                else:
+                                    iPkDialect = Dialect.get_item({'stad': oLine['dialect_stad'], 
+                                                                    'nieuw': oLine['dialect_nieuw']}, oTime)
+                                if sLastDialectKloeke != oLine.get('dialect_kloeke'):
+                                    sLastDialectKloeke = oLine.get('dialect_kloeke')
+
+                                # Find out which trefwoord this is
+                                sTwToel = oLine['trefwoord_toelichting']
+                                if sTwToel == None or sTwToel == "":
+                                    if sLastTwToel != "" or sLastTw != sTrefWoord:
+                                        iPkTrefwoord = Trefwoord.get_item({'woord': sTrefWoord}, oTime)
+                                        sLastTw = sTrefWoord
+                                        sLastTwToel = ""
+                                else:
+                                    if sLastTw != sTrefWoord or sLastTwToel != sTwToel:
+                                        iPkTrefwoord = Trefwoord.get_item({'woord': sTrefWoord,
+                                                                        'toelichting': sTwToel}, oTime)
+                                        sLastTw = sTrefWoord
+                                        sLastTwToel = sTwToel
+                            oTime['db'] += get_now_time() - iStarttime
+
+                            # Check validity
+                            if iPkDescr < 0 or iPkLemma < 0 or iPkLemmaDescr < 0 or iPkDialect < 0 or iPkTrefwoord < 0:
+                                # Something has gone wrong: we cannot continue
+                                oStatus.set_status("error")
+                                errHandle.DoError("csv_to_fixture has a negative index", True)
+                                return oBack
+
+                            # Process the ENTRY
+                            sDialectWoord = oLine['dialectopgave_name']
+
+                            # Issue #43: strip off article if needed
+                            if "huis" in xlsx_file.lower():
+                                # Split word by spaces
+                                arWoord = sDialectWoord.split(" ")
+                                # Do we have more than one part?
+                                if len(arWoord) > 0 and arWoord[0].lower() in articles:
+                                    sDialectWoord = " ".join(arWoord[1:])
+
+                            # WGD-specific
+                            sSubvraag = oLine['subvraag']
+                            sInWoordenboek = "true" if oLine['inwoordenboek'] == "ja" else "false"
+                            sComment = oLine['opmerking']
+                            # Make sure that I use my OWN continuous [pk] for Entry
+                            iPkEntry += 1
+                            # Do *NOT* use the Entry PK that is returned 
+                            iStarttime = get_now_time()
+                            iDummy = oFix.get_pk(oEntry, "dictionary.entry", False,
+                                                    pk=iPkEntry,
+                                                    woord=sDialectWoord,
+                                                    toelichting=oLine['dialectopgave_toelichting'],
+                                                    kloeketoelichting=oLine['dialectopgave_kloeketoelichting'],
+                                                    lemma=iPkLemma,
+                                                    descr=iPkDescr,     # This is the Description that in principle is valid for the whole lemma, but not in practice
+                                                    dialect=iPkDialect,
+                                                    trefwoord=iPkTrefwoord,
+                                                    subvraag=sSubvraag,
+                                                    inwoordenboek=sInWoordenboek,
+                                                    opmerking=sComment,
+                                                    aflevering=iPkAflevering)
+                            oTime['entry'] += get_now_time() - iStarttime
+
+                            if bDoMijnen:
+                                # Walk all the mijnen for this entry
+                                for sMijn in lMijnen:
+                                    # Get the PK for this mijn
+                                    iPkMijn = Mijn.get_item({'naam': sMijn}, oTime)
+                                    # Process the PK for EntryMijn
+                                    iPkEntryMijn = EntryMijn.get_item({'entry': iPkEntry,
+                                                                        'mijn': iPkMijn})
+
+                            iRead += 1
+                        else:
+                            # Still process lastlemma and lastdialectkloeke
+                            if oLine.get('lemma_name') != sLastLemma:
+                                sLastLemma = oLine.get('lemma_name')
+
                             if sLastDialectKloeke != oLine.get('dialect_kloeke'):
                                 sLastDialectKloeke = oLine.get('dialect_kloeke')
 
-                            # Find out which trefwoord this is
-                            sTwToel = oLine['trefwoord_toelichting']
-                            if sTwToel == None or sTwToel == "":
-                                if sLastTwToel != "" or sLastTw != sTrefWoord:
-                                    iPkTrefwoord = Trefwoord.get_item({'woord': sTrefWoord}, oTime)
-                                    sLastTw = sTrefWoord
-                                    sLastTwToel = ""
-                            else:
-                                if sLastTw != sTrefWoord or sLastTwToel != sTwToel:
-                                    iPkTrefwoord = Trefwoord.get_item({'woord': sTrefWoord,
-                                                                    'toelichting': sTwToel}, oTime)
-                                    sLastTw = sTrefWoord
-                                    sLastTwToel = sTwToel
-                        oTime['db'] += get_now_time() - iStarttime
+                            if sLastTrefwoord != oLine.get('trefwoord_name'):
+                                sLastTrefwoord = oLine.get('trefwoord_name')
 
-                        # Check validity
-                        if iPkDescr < 0 or iPkLemma < 0 or iPkLemmaDescr < 0 or iPkDialect < 0 or iPkTrefwoord < 0:
-                            # Something has gone wrong: we cannot continue
-                            oStatus.set_status("error")
-                            errHandle.DoError("csv_to_fixture has a negative index", True)
-                            return oBack
-
-                        # Process the ENTRY
-                        sDialectWoord = oLine['dialectopgave_name']
-
-                        # Issue #43: strip off article if needed
-                        if "huis" in xlsx_file.lower():
-                            # Split word by spaces
-                            arWoord = sDialectWoord.split(" ")
-                            # Do we have more than one part?
-                            if len(arWoord) > 0 and arWoord[0].lower() in articles:
-                                sDialectWoord = " ".join(arWoord[1:])
-
-                        # WGD-specific
-                        sSubvraag = oLine['subvraag']
-                        sInWoordenboek = "true" if oLine['inwoordenboek'] == "ja" else "false"
-                        sComment = oLine['opmerking']
-                        # Make sure that I use my OWN continuous [pk] for Entry
-                        iPkEntry += 1
-                        # Do *NOT* use the Entry PK that is returned 
-                        iStarttime = get_now_time()
-                        iDummy = oFix.get_pk(oEntry, "dictionary.entry", False,
-                                                pk=iPkEntry,
-                                                woord=sDialectWoord,
-                                                toelichting=oLine['dialectopgave_toelichting'],
-                                                kloeketoelichting=oLine['dialectopgave_kloeketoelichting'],
-                                                lemma=iPkLemma,
-                                                descr=iPkDescr,     # This is the Description that in principle is valid for the whole lemma, but not in practice
-                                                dialect=iPkDialect,
-                                                trefwoord=iPkTrefwoord,
-                                                subvraag=sSubvraag,
-                                                inwoordenboek=sInWoordenboek,
-                                                opmerking=sComment,
-                                                aflevering=iPkAflevering)
-                        oTime['entry'] += get_now_time() - iStarttime
-
-                        if bDoMijnen:
-                            # Walk all the mijnen for this entry
-                            for sMijn in lMijnen:
-                                # Get the PK for this mijn
-                                iPkMijn = Mijn.get_item({'naam': sMijn}, oTime)
-                                # Process the PK for EntryMijn
-                                iPkEntryMijn = EntryMijn.get_item({'entry': iPkEntry,
-                                                                    'mijn': iPkMijn})
-
-                        iRead += 1
-                    else:
-                        # Still process lastlemma and lastdialectkloeke
-                        if oLine.get('lemma_name') != sLastLemma:
-                            sLastLemma = oLine.get('lemma_name')
-
-                        if sLastDialectKloeke != oLine.get('dialect_kloeke'):
-                            sLastDialectKloeke = oLine.get('dialect_kloeke')
-
-                        if sLastTrefwoord != oLine.get('trefwoord_name'):
-                            sLastTrefwoord = oLine.get('trefwoord_name')
-
-                        # This line is being skipped
-                        oSkip.append(oProc.line())
-                        iSkipped += 1
-                        sIdx = 'line-' + str(iValid)
-                        if not sIdx in oBack:
-                            oBack[sIdx] = 0
-                        oBack[sIdx] +=1
-                    # Keep track of progress
-                    oStatus.skipped = iSkipped
-                    oStatus.read = iRead
-                    oStatus.status = "{} (read={:.1f}, db={:.1f}, entry={:.1f}, search (L={:.1f}, T={:.1f}, Ds={:.1f}, LD={:.1f}, Dt={:.1f}, M={:.1f}), save={:.1f})".format(
-                        sWorking, oTime['read'], oTime['db'], oTime['entry'],
-                        oTime['search_L'], oTime['search_T'], oTime['search_Ds'], oTime['search_LD'], oTime['search_Dt'], oTime['search_M'], oTime['save'])
-                    oStatus.save()
+                            # This line is being skipped
+                            oSkip.append(oProc.line())
+                            iSkipped += 1
+                            sIdx = 'line-' + str(iValid)
+                            if not sIdx in oBack:
+                                oBack[sIdx] = 0
+                            oBack[sIdx] +=1
+                        # Keep track of progress
+                        oStatus.skipped = iSkipped
+                        oStatus.read = iRead
+                        oStatus.status = "{} (read={:.1f}, db={:.1f}, entry={:.1f}, search (L={:.1f}, T={:.1f}, Ds={:.1f}, LD={:.1f}, Dt={:.1f}, M={:.1f}), save={:.1f})".format(
+                            sWorking, oTime['read'], oTime['db'], oTime['entry'],
+                            oTime['search_L'], oTime['search_T'], oTime['search_Ds'], oTime['search_LD'], oTime['search_Dt'], oTime['search_M'], oTime['save'])
+                        oStatus.save()
 
 
                 # Close the skip file
