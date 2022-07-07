@@ -6,7 +6,7 @@ from django.views.generic.detail import DetailView
 from django.urls import reverse
 
 from django.views.generic.list import ListView, View
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpRequest, HttpResponse
 from django.template import RequestContext, loader
 from django.template.loader import render_to_string
@@ -97,7 +97,7 @@ class MapView(DetailView):
 
     def get(self, request, *args, **kwargs):
         # No errors, just return to the homepage
-        return reverse('home')
+        return redirect(reverse('home'))
 
     def initialize(self):
         # This is where the user may himself call [add_entry] to fill the [entry_list]
