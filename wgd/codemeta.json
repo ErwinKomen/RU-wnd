@@ -1,0 +1,84 @@
+{
+    "@context": [
+        "https://doi.org/10.5063/schema/codemeta-2.0",
+        "http://schema.org",
+        {
+            "entryPoints": { "@reverse": "schema:actionApplication" },
+            "interfaceType": { "@id": "codemeta:interfaceType" }
+        }
+    ],
+    "@type": "SoftwareSourceCode",
+    "identifier": "ewgd",
+    "name": "Electronisch woordenboek van de Gelderse dialecten",
+    "version": "unknown",
+    "description": "Django web application that facilities viewing and searching a dictionary of Dutch dialects from the province 'Gelderland'",
+    "license": "unknown",
+	"url": "https://github.com/ErwinKomen/RU-Wnd",
+    "producer": {
+        "@id": "https://www.ru.nl/facultyofarts/research/humanities-lab/our-labs",
+        "@type": "Organization",
+        "name": "Technical Support Group",
+        "url": "https://www.ru.nl/facultyofarts/research/humanities-lab/our-labs",
+        "parentOrganization": {
+            "@id": "https://www.ru.nl/facultyofarts/research/humanities-lab",
+            "@type": "Organization",
+            "name": "Humanities Lab",
+            "url": "https://www.ru.nl/facultyofarts/research/humanities-lab",
+            "parentOrganization": {
+                "@id": "https://www.ru.nl/facultyofarts/",
+                "@type": "Organization",
+                "name": "Faculty of Arts",
+                "url": "https://www.ru.nl/facultyofarts/",
+                "parentOrganization": {
+                    "@id": "https://www.ru.nl",
+                    "name": "Radboud University",
+                    "@type": "Organization",
+                    "url": "https://www.ru.nl",
+                    "location": {
+                        "@type": "Place",
+                        "name": "Nijmegen"
+                    }
+                }
+            }
+        }
+    },
+    "author": [
+		{
+			"@type": "Person",
+			"givenName": "Erwin",
+			"familyName": "Komen",
+			"affiliation": { "@id": "https://www.ru.nl/facultyofarts/research/humanities-lab" }
+		}
+	],
+	"sourceOrganization": { "@id": "https://www.ru.nl/facultyofarts/research/humanities-lab" },
+	"programmingLanguage": {
+		"@type": "ComputerLanguage",
+		"identifier": "python",
+		"name": "Django with Python3"
+	},
+	"operatingSystem": "POSIX",
+	"codeRepository": "https://github.com/ErwinKomen/RU-wnd/tree/master/wld",
+    "softwareRequirements": [],
+	"funder": [
+		{
+			"@type": "Organization",
+			"name": "ClariaH",
+			"url": "https://www.clariah.nl/projecten/research-pilots/acad"
+		}
+	],
+	"issueTracker": "https://github.com/ErwinKomen/RU-wnd/issues",
+	"developmentStatus": "active",
+  "keywords": [ "dutch", "dialect", "dictionary" ],
+    "referencePublication": [
+		{
+			"@type": "TechArticle",
+			"name": "",
+			"author": [ "Erwin R. Komen" ],
+            "datePublished": "2019",
+			"url": ""
+		}
+	],
+    "dateCreated": "2019",
+    "entryPoints": [
+    ]
+}
