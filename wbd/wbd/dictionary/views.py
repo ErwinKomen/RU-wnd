@@ -680,98 +680,105 @@ class TrefwoordListView(ListView):
             return oResponse
 
     def get_context_data(self, **kwargs):
-        # Call the base implementation first to get a context
-        context = super(TrefwoordListView, self).get_context_data(**kwargs)
+        context = {}
+        oErr = ErrHandle()
+        try:
+            # Call the base implementation first to get a context
+            context = super(TrefwoordListView, self).get_context_data(**kwargs)
 
-        # Action depends on the approach
-        if self.bWbdApproach:
-            # Need to adapt the object_list to get the entries to be used
-            context['object_list'] = self.get_entryset(context['page_obj'])
+            # Action depends on the approach
+            if self.bWbdApproach:
+                # Need to adapt the object_list to get the entries to be used
+                context['object_list'] = self.get_entryset(context['page_obj'])
 
-        # Get parameters for the search
-        initial = self.request.GET
-        if initial is None:
-            initial = {'optdialect': 'stad'}
+            # Get parameters for the search
+            initial = self.request.GET
+            if initial is None:
+                initial = {'optdialect': 'stad'}
 
-        # Fill the 'searchform' context variable with the values that are received from the GET request
-        search_form = TrefwoordSearchForm(initial)
-        context['searchform'] = search_form
+            # Fill the 'searchform' context variable with the values that are received from the GET request
+            search_form = TrefwoordSearchForm(initial)
+            context['searchform'] = search_form
 
-        if 'paginate_by' in initial and not context['page_obj'] is None:
-            context['paginateSize'] = int(initial['paginate_by'])
-            self.paginate_by = int(initial['paginate_by'])
-        else:
-            context['paginateSize'] = self.paginate_by  # paginateSize
+            if 'paginate_by' in initial and not context['page_obj'] is None:
+                context['paginateSize'] = int(initial['paginate_by'])
+                self.paginate_by = int(initial['paginate_by'])
+            else:
+                context['paginateSize'] = self.paginate_by  # paginateSize
 
-        if self.bUseMijnen:
-            # Try to retain the choice for Mijn
-            if 'mijn' in initial:
-                mijn_id = int(initial['mijn'])
-                context['mijnkeuze'] = mijn_id
-                mijn_inst = Mijn.objects.filter(id=mijn_id).first()
-                if mijn_inst == None:
+            if self.bUseMijnen:
+                # Try to retain the choice for Mijn
+                if 'mijn' in initial:
+                    mijn_id = int(initial['mijn'])
+                    context['mijnkeuze'] = mijn_id
+                    mijn_inst = Mijn.objects.filter(id=mijn_id).first()
+                    if mijn_inst == None:
+                        context['mijnnaam'] = ''
+                    else:
+                        context['mijnnaam'] = mijn_inst.naam
+                else:
+                    context['mijnkeuze'] = 0
                     context['mijnnaam'] = ''
+            # Process and retain the choice for Aflevering
+            if 'aflevering' in initial:
+                context['aflkeuze'] = int(initial['aflevering'])
+                afl = Aflevering.objects.filter(id=context['aflkeuze']).first()
+                if afl == None:
+                    context['afl'] = ''
                 else:
-                    context['mijnnaam'] = mijn_inst.naam
+                    context['afl'] = afl.get_summary()
             else:
-                context['mijnkeuze'] = 0
-                context['mijnnaam'] = ''
-        # Process and retain the choice for Aflevering
-        if 'aflevering' in initial:
-            context['aflkeuze'] = int(initial['aflevering'])
-            afl = Aflevering.objects.filter(id=context['aflkeuze']).first()
-            if afl == None:
+                context['aflkeuze'] = 0
                 context['afl'] = ''
-            else:
-                context['afl'] = afl.get_summary()
-        else:
-            context['aflkeuze'] = 0
-            context['afl'] = ''
 
-        # Get possible user choice of 'strict'
-        if 'strict' in initial:
-            self.strict = (initial['strict'] == "True")
-        context['strict'] = str(self.strict)
+            # Get possible user choice of 'strict'
+            if 'strict' in initial:
+                self.strict = (initial['strict'] == "True")
+            context['strict'] = str(self.strict)
         
-        # Determine the count 
-        context['entrycount'] = self.entrycount   #  self.get_queryset().count()
-        # context['twcount'] = self.twcount
+            # Determine the count 
+            context['entrycount'] = self.entrycount   #  self.get_queryset().count()
+            # context['twcount'] = self.twcount
 
-        # Make sure the paginate-values are available
-        context['paginateValues'] = paginateValues
+            # Make sure the paginate-values are available
+            context['paginateValues'] = paginateValues
 
-        # Set the prefix
-        context['app_prefix'] = APP_PREFIX
+            # Set the prefix
+            context['app_prefix'] = APP_PREFIX
 
-        # Set the afleveringen and mijnen that are available
-        context['afleveringen'] = [afl for afl in Aflevering.objects.all()]
-        if self.bUseMijnen:
-            context['mijnen'] = [mijn for mijn in Mijn.objects.all().order_by('naam')]
+            # Set the afleveringen and mijnen that are available
+            context['afleveringen'] = [afl for afl in Aflevering.objects.all()]
+            if self.bUseMijnen:
+                context['mijnen'] = [mijn for mijn in Mijn.objects.all().order_by('naam')]
 
-        # Set the title of the application
-        context['title'] = "{} trefwoorden".format(THIS_DICTIONARY)
+            # Set the title of the application
+            context['title'] = "{} trefwoorden".format(THIS_DICTIONARY)
 
-        # If we are in 'strict' mode, we need to deliver the [qlist]
-        if self.strict:
-            # Transform the paginated queryset into a dict sorted by Dialect/Aflevering
-            lAflev = self.get_qafl(context)
+            # If we are in 'strict' mode, we need to deliver the [qlist]
+            if self.strict:
+                # Transform the paginated queryset into a dict sorted by Dialect/Aflevering
+                lAflev = self.get_qafl(context)
 
-            # Get a list with 'first' and 'last' values for each item in the current paginated queryset
-            lEntry = self.get_qlist(context)
-            # Add the sorted-dialect information to lEntry
-            for idx, item in enumerate(lEntry):
-                # Start or Finish dialect information
-                if item['trefwoord_woord']['first']:
-                    qsa = []
-                # All: add this entry
-                qsa.append(lAflev[idx])
-                if item['trefwoord_woord']['last']:
-                    # COpy the list of Entry elements sorted by Trefwoord/Aflevering here
-                    lEntry[idx]['alist'] = qsa
-                else:
-                    lEntry[idx]['alist'] = None
+                # Get a list with 'first' and 'last' values for each item in the current paginated queryset
+                lEntry = self.get_qlist(context)
+                # Add the sorted-dialect information to lEntry
+                for idx, item in enumerate(lEntry):
+                    # Start or Finish dialect information
+                    if item['trefwoord_woord']['first']:
+                        qsa = []
+                    # All: add this entry
+                    qsa.append(lAflev[idx])
+                    if item['trefwoord_woord']['last']:
+                        # COpy the list of Entry elements sorted by Trefwoord/Aflevering here
+                        lEntry[idx]['alist'] = qsa
+                    else:
+                        lEntry[idx]['alist'] = None
 
-            context['qlist'] = lEntry
+                context['qlist'] = lEntry
+
+        except:
+            msg = oErr.get_error_message()
+            oErr.DoError("TrefwoordListView")
 
         # Return the calculated context
         return context
@@ -1678,6 +1685,7 @@ class LocationListView(ListView):
 
     def get_context_data(self, **kwargs):
         oErr = ErrHandle()
+        context = {}
         try:
             # Call the base implementation first to get a context
             context = super(LocationListView, self).get_context_data(**kwargs)
@@ -2021,69 +2029,76 @@ class DialectListView(ListView):
     bImportKloekeInfo = False
 
     def get_context_data(self, **kwargs):
-        # Call the base implementation first to get a context
-        context = super(DialectListView, self).get_context_data(**kwargs)
-
         oErr = ErrHandle()
-        # One-time calls
-        qs = Dialect.objects.filter(coordinate__isnull=True)
-        count_dialect = qs.count()
-        if self.bImportKloekeInfo: 
-            import_kloeke_cumul()
-            # Another one-time call
-            import_kloeke_info()
-            count_after = Dialect.objects.filter(coordinate__isnull=True).count()
-            count_gain = count_dialect - count_after
+        context = {}
+        try:
+            # Call the base implementation first to get a context
+            context = super(DialectListView, self).get_context_data(**kwargs)
 
-        # Try to do repair
-        if count_dialect > 0:
-            with transaction.atomic():
-                for dialect in qs:
-                    # Get the kloekecode minus the last letter and the place-name
-                    kloeke_truncated = dialect.nieuw[0:4]
-                    stad = dialect.stad
-                    # Find this one in Coordinates
-                    coordinate = Coordinate.objects.filter(place__iexact=stad, kloeke__startswith=kloeke_truncated).first()
-                    if coordinate == None and "-" in stad:
-                        stad = stad.replace("-", " ")
+            oErr = ErrHandle()
+            # One-time calls
+            qs = Dialect.objects.filter(coordinate__isnull=True)
+            count_dialect = qs.count()
+            if self.bImportKloekeInfo: 
+                import_kloeke_cumul()
+                # Another one-time call
+                import_kloeke_info()
+                count_after = Dialect.objects.filter(coordinate__isnull=True).count()
+                count_gain = count_dialect - count_after
+
+            # Try to do repair
+            if count_dialect > 0:
+                with transaction.atomic():
+                    for dialect in qs:
+                        # Get the kloekecode minus the last letter and the place-name
+                        kloeke_truncated = dialect.nieuw[0:4]
+                        stad = dialect.stad
+                        # Find this one in Coordinates
                         coordinate = Coordinate.objects.filter(place__iexact=stad, kloeke__startswith=kloeke_truncated).first()
-                    if coordinate != None:
-                        # ======= DEBUG ==================
-                        oErr.Status("WBD adapt {} to {}".format(dialect.nieuw, coordinate.kloeke))
-                        # ================================
-                        # Adapt the dialect's kloeke code
-                        dialect.nieuw = coordinate.kloeke
-                        # Set the dialect's coordinate entry
-                        dialect.coordinate = coordinate
-                        # Make sure the correct stad (place name) is chosen
-                        dialect.stad = stad
-                        # Save the result
-                        dialect.save()
-            count_after = Dialect.objects.filter(coordinate__isnull=True).count()
-            count_gain = count_dialect - count_after
+                        if coordinate == None and "-" in stad:
+                            stad = stad.replace("-", " ")
+                            coordinate = Coordinate.objects.filter(place__iexact=stad, kloeke__startswith=kloeke_truncated).first()
+                        if coordinate != None:
+                            # ======= DEBUG ==================
+                            oErr.Status("WBD adapt {} to {}".format(dialect.nieuw, coordinate.kloeke))
+                            # ================================
+                            # Adapt the dialect's kloeke code
+                            dialect.nieuw = coordinate.kloeke
+                            # Set the dialect's coordinate entry
+                            dialect.coordinate = coordinate
+                            # Make sure the correct stad (place name) is chosen
+                            dialect.stad = stad
+                            # Save the result
+                            dialect.save()
+                count_after = Dialect.objects.filter(coordinate__isnull=True).count()
+                count_gain = count_dialect - count_after
 
-        # Get parameters for the search
-        initial = self.request.GET
-        search_form = DialectSearchForm(initial)
+            # Get parameters for the search
+            initial = self.request.GET
+            search_form = DialectSearchForm(initial)
 
-        context['searchform'] = search_form
+            context['searchform'] = search_form
 
-        # Determine the count 
-        context['entrycount'] = self.entrycount # self.get_queryset().count()
+            # Determine the count 
+            context['entrycount'] = self.entrycount # self.get_queryset().count()
 
-        # Set the prefix
-        context['app_prefix'] = APP_PREFIX
+            # Set the prefix
+            context['app_prefix'] = APP_PREFIX
 
-        # Make sure the paginate-values are available
-        context['paginateValues'] = paginateValues
+            # Make sure the paginate-values are available
+            context['paginateValues'] = paginateValues
 
-        if 'paginate_by' in initial and initial['paginate_by'] != "":
-            context['paginateSize'] = int(initial['paginate_by'])
-        else:
-            context['paginateSize'] = paginateSize
+            if 'paginate_by' in initial and initial['paginate_by'] != "":
+                context['paginateSize'] = int(initial['paginate_by'])
+            else:
+                context['paginateSize'] = paginateSize
 
-        # Set the title of the application
-        context['title'] = "{} dialecten".format(THIS_DICTIONARY)
+            # Set the title of the application
+            context['title'] = "{} dialecten".format(THIS_DICTIONARY)
+
+        except:
+            msg = oErr.get_error_message()
+            oErr.DoError("DialectListView")
 
         # Return the calculated context
         return context

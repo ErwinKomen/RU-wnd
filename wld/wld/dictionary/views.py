@@ -639,11 +639,12 @@ class TrefwoordListView(ListView):
             return oResponse
 
     def get_context_data(self, **kwargs):
-        # Call the base implementation first to get a context
-        context = super(TrefwoordListView, self).get_context_data(**kwargs)
-
+        context = {}
         oErr = ErrHandle()
         try:
+            # Call the base implementation first to get a context
+            context = super(TrefwoordListView, self).get_context_data(**kwargs)
+
             # Action depends on the approach
             if self.bWbdApproach:
                 # Need to adapt the object_list to get the entries to be used
@@ -1987,69 +1988,75 @@ class DialectListView(ListView):
     bImportKloekeInfo = False
 
     def get_context_data(self, **kwargs):
-        # Call the base implementation first to get a context
-        context = super(DialectListView, self).get_context_data(**kwargs)
-
+        context = {}
         oErr = ErrHandle()
-        # One-time calls
-        qs = Dialect.objects.filter(coordinate__isnull=True)
-        count_dialect = qs.count()
-        if self.bImportKloekeInfo: 
-            import_kloeke_cumul()
-            # Another one-time call
-            import_kloeke_info()
+        try:
+            # Call the base implementation first to get a context
+            context = super(DialectListView, self).get_context_data(**kwargs)
 
-        # Try to do repair
-        if count_dialect > 0:
-            with transaction.atomic():
-                for dialect in qs:
-                    # Get the kloekecode minus the last letter and the place-name
-                    kloeke_truncated = dialect.nieuw[0:4]
-                    stad = dialect.stad
-                    # Find this one in Coordinates
-                    coordinate = Coordinate.objects.filter(place__iexact=stad, kloeke__startswith=kloeke_truncated).first()
-                    if coordinate == None and "-" in stad:
-                        stad = stad.replace("-", " ")
+            # One-time calls
+            qs = Dialect.objects.filter(coordinate__isnull=True)
+            count_dialect = qs.count()
+            if self.bImportKloekeInfo: 
+                import_kloeke_cumul()
+                # Another one-time call
+                import_kloeke_info()
+
+            # Try to do repair
+            if count_dialect > 0:
+                with transaction.atomic():
+                    for dialect in qs:
+                        # Get the kloekecode minus the last letter and the place-name
+                        kloeke_truncated = dialect.nieuw[0:4]
+                        stad = dialect.stad
+                        # Find this one in Coordinates
                         coordinate = Coordinate.objects.filter(place__iexact=stad, kloeke__startswith=kloeke_truncated).first()
-                    if coordinate != None:
-                        # ======= DEBUG ==================
-                        oErr.Status("WGD adapt {} to {}".format(dialect.nieuw, coordinate.kloeke))
-                        # ================================
-                        # Adapt the dialect's kloeke code
-                        dialect.nieuw = coordinate.kloeke
-                        # Set the dialect's coordinate entry
-                        dialect.coordinate = coordinate
-                        # Make sure the correct stad (place name) is chosen
-                        dialect.stad = stad
-                        # Save the result
-                        dialect.save()
-            count_after = Dialect.objects.filter(coordinate__isnull=True).count()
-            count_gain = count_dialect - count_after
-            if self.bDoTime:
-                oErr.Status("Count before: {}, after: {}".format(count_dialect, count_after))
+                        if coordinate == None and "-" in stad:
+                            stad = stad.replace("-", " ")
+                            coordinate = Coordinate.objects.filter(place__iexact=stad, kloeke__startswith=kloeke_truncated).first()
+                        if coordinate != None:
+                            # ======= DEBUG ==================
+                            oErr.Status("WGD adapt {} to {}".format(dialect.nieuw, coordinate.kloeke))
+                            # ================================
+                            # Adapt the dialect's kloeke code
+                            dialect.nieuw = coordinate.kloeke
+                            # Set the dialect's coordinate entry
+                            dialect.coordinate = coordinate
+                            # Make sure the correct stad (place name) is chosen
+                            dialect.stad = stad
+                            # Save the result
+                            dialect.save()
+                count_after = Dialect.objects.filter(coordinate__isnull=True).count()
+                count_gain = count_dialect - count_after
+                if self.bDoTime:
+                    oErr.Status("Count before: {}, after: {}".format(count_dialect, count_after))
 
-        # Get parameters for the search
-        initial = self.request.GET
-        search_form = DialectSearchForm(initial)
+            # Get parameters for the search
+            initial = self.request.GET
+            search_form = DialectSearchForm(initial)
 
-        context['searchform'] = search_form
+            context['searchform'] = search_form
 
-        # Determine the count 
-        context['entrycount'] = self.get_queryset().count()
+            # Determine the count 
+            context['entrycount'] = self.get_queryset().count()
 
-        # Set the prefix
-        context['app_prefix'] = APP_PREFIX
+            # Set the prefix
+            context['app_prefix'] = APP_PREFIX
 
-        # Make sure the paginate-values are available
-        context['paginateValues'] = paginateValues
+            # Make sure the paginate-values are available
+            context['paginateValues'] = paginateValues
 
-        if 'paginate_by' in initial and initial['paginate_by'] != "":
-            context['paginateSize'] = int(initial['paginate_by'])
-        else:
-            context['paginateSize'] = paginateSize
+            if 'paginate_by' in initial and initial['paginate_by'] != "":
+                context['paginateSize'] = int(initial['paginate_by'])
+            else:
+                context['paginateSize'] = paginateSize
 
-        # Set the title of the application
-        context['title'] = "{} dialecten".format(THIS_DICTIONARY)
+            # Set the title of the application
+            context['title'] = "{} dialecten".format(THIS_DICTIONARY)
+
+        except:
+            msg = oErr.get_error_message()
+            oErr.DoError("DialectListView")
 
         # Return the calculated context
         return context
