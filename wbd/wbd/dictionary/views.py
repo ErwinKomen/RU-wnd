@@ -39,6 +39,7 @@ paginateLocations = 2
 paginateEntries = 100
 # OLD: paginateValues = (1000, 500, 250, 100, 50, 40, 30, 20, 10, )
 paginateValues = (100, 50, 20, 10, 5, 2, 1, )
+paginateMax = 100
 outputColumns = ['begrip', 'trefwoord', 'dialectopgave', 'Kloekecode', 'aflevering', 'bronnenlijst']
 rGarbage = re.compile(r'[^a-zA-Z0-9 -\#\[\]\?\*]')
 
@@ -705,7 +706,7 @@ class TrefwoordListView(ListView):
 
             if 'paginate_by' in initial and not context['page_obj'] is None:
                 context['paginateSize'] = int(initial['paginate_by'])
-                self.paginate_by = int(initial['paginate_by'])
+                self.paginate_by = min(paginateMax, int(initial['paginate_by']))
             else:
                 context['paginateSize'] = self.paginate_by  # paginateSize
 
@@ -1203,7 +1204,7 @@ class LemmaListView(ListView):
 
             if 'paginate_by' in initial:
                 context['paginateSize'] = int(initial['paginate_by'])
-                self.paginate_by = int(initial['paginate_by'])
+                self.paginate_by = min(paginateMax, int(initial['paginate_by']))
             else:
                 context['paginateSize'] = self.paginate_by
 
@@ -1742,7 +1743,7 @@ class LocationListView(ListView):
 
             if 'paginate_by' in initial:
                 context['paginateSize'] = int(initial['paginate_by'])
-                self.paginate_by = int(initial['paginate_by'])
+                self.paginate_by = min(paginateMax, int(initial['paginate_by']))
             else:
                 context['paginateSize'] = self.paginate_by
 
