@@ -616,6 +616,9 @@ def import_kloeke_cumul():
     return bSuccess
 
 
+# ============= REGULAR DETAIL AND LISTVIEWS ================================
+
+
 class DictionaryDetailView(DetailView):
     """Details of an entry from the dictionary"""
 
@@ -680,7 +683,7 @@ class TrefwoordListView(ListView):
             return oResponse
 
     def get_context_data(self, **kwargs):
-        context = {}
+        context = {'optdialect': 'stad'}
         oErr = ErrHandle()
         try:
             # Call the base implementation first to get a context
@@ -927,7 +930,7 @@ class TrefwoordListView(ListView):
 
         except:
             msg = oErr.get_error_message()
-            oErr.DoError("TrefwoordListView/get_queryset")
+            oErr.DoError("TrefwoordListView/get_entryset")
 
         self.qEntry = qse
         return qse
@@ -1052,7 +1055,7 @@ class TrefwoordListView(ListView):
                 print("TrefwoordListView get_queryset part 3: {:.1f}".format(get_now_time() - iStart))
         except:
             msg = oErr.get_error_message()
-            oErr.DoError("TrefwoordListView")
+            oErr.DoError("TrefwoordListView/get_queryset")
 
         return qse
 
@@ -1153,11 +1156,12 @@ class LemmaListView(ListView):
         return JsonResponse(oData)
 
     def get_context_data(self, **kwargs):
-        # Call the base implementation first to get a context
-        context = super(LemmaListView, self).get_context_data(**kwargs)
-
         oErr = ErrHandle()
+        context = {'optdialect': 'stad'}
         try:
+            # Call the base implementation first to get a context
+            context = super(LemmaListView, self).get_context_data(**kwargs)
+
             # Get parameters for the search
             # initial = self.request.GET
             initial = self.get
@@ -1392,107 +1396,115 @@ class LemmaListView(ListView):
         lstQ = []
         bHasSearch = False
         bHasFilter = False
+        qse = Entry.objects.none()
 
-        # Initialize timer
-        if self.bDoTime: iStart = get_now_time()
+        oErr = ErrHandle()
+        try:
 
-        # Retrieve the set of trefwoorden from the page_obj
-        lemma_list = [item.id for item in page_obj.object_list]
-        if self.bDoTime: print("LemmaListView get_entryset part 1: {:.1f}".format(get_now_time() - iStart))
+            # Initialize timer
+            if self.bDoTime: iStart = get_now_time()
 
-        if self.bDoTime: iStart = get_now_time()
-        # Initialize the filtering
-        lstQ.append(Q(lemma__id__in=lemma_list))
-        # lstQ.append(Q(lemma__id__in=page_obj))
+            # Retrieve the set of trefwoorden from the page_obj
+            lemma_list = [item.id for item in page_obj.object_list]
+            if self.bDoTime: print("LemmaListView get_entryset part 1: {:.1f}".format(get_now_time() - iStart))
 
-        # Get the parameters passed on with the GET request
-        get = self.get
+            if self.bDoTime: iStart = get_now_time()
+            # Initialize the filtering
+            lstQ.append(Q(lemma__id__in=lemma_list))
+            # lstQ.append(Q(lemma__id__in=page_obj))
 
-        # Check for dialect city
-        if 'dialectCity' in get and get['dialectCity'] != '':
-            val = adapt_search(get['dialectCity'])
+            # Get the parameters passed on with the GET request
+            get = self.get
+
+            # Check for dialect city
+            if 'dialectCity' in get and get['dialectCity'] != '':
+                val = adapt_search(get['dialectCity'])
+                if self.strict:
+                    lstQ.append(Q(dialect__stad__iregex=val))
+                else:
+                    lstQ.append(Q(entry__dialect__stad__iregex=val))
+                bHasFilter = True
+
+            # Check for dialect code (Kloeke)
+            if 'dialectCode' in get and get['dialectCode'] != '':
+                val = adapt_search(get['dialectCode'])
+                if self.strict:
+                    lstQ.append(Q(dialect__nieuw__iregex=val))
+                else:
+                    lstQ.append(Q(entry__dialect__nieuw__iregex=val))
+                bHasFilter = True
+
+            # Check for dialect word, which is a direct member of Entry
+            if 'woord' in get and get['woord'] != '':
+                val = adapt_search(get['woord'])
+                if self.strict:
+                    lstQ.append(Q(woord__iregex=val))
+                else:
+                    lstQ.append(Q(entry__woord__iregex=val))
+                bHasFilter = True
+
+            # Check for aflevering
+            if 'aflevering' in get and get['aflevering'] != '':
+                # What we get should be a number
+                val = get['aflevering']
+                if val.isdigit():
+                    iVal = int(val)
+                    if iVal>0:
+                        if self.strict:
+                            lstQ.append(Q(aflevering__id=iVal))
+                        else:
+                            lstQ.append(Q(entry__aflevering__id=iVal))
+                        bHasFilter = True
+
+            # Check for mijn
+            if 'mijn' in get and get['mijn'] != '':
+                # What we get should be a number
+                val = get['mijn']
+                if val.isdigit():
+                    iVal = int(val)
+                    if iVal>0:
+                        if self.strict:
+                            lstQ.append(Q(mijnlijst__id=iVal))
+                        else:
+                            lstQ.append(Q(entry__mijnlijst__id=iVal))
+                        bHasFilter = True
+
+            # Make sure we filter on aflevering.toonbaar
             if self.strict:
-                lstQ.append(Q(dialect__stad__iregex=val))
+                lstQ.append(Q(aflevering__toonbaar=True))
             else:
-                lstQ.append(Q(entry__dialect__stad__iregex=val))
-            bHasFilter = True
+                lstQ.append(Q(entry__aflevering__toonbaar=True))
 
-        # Check for dialect code (Kloeke)
-        if 'dialectCode' in get and get['dialectCode'] != '':
-            val = adapt_search(get['dialectCode'])
-            if self.strict:
-                lstQ.append(Q(dialect__nieuw__iregex=val))
+            if self.bDoTime: print("LemmaListView get_entryset part 2: {:.1f}".format(get_now_time() - iStart))
+
+            # Make the QSE available
+            # Order: "lemma_gloss", "trefwoord_woord", "dialectopgave", "dialect_stad"
+            if self.bDoTime: iStart = get_now_time()
+            if self.bOrderWrdToel:
+                qse = Entry.objects.filter(*lstQ).distinct().select_related().order_by(
+                    Lower('lemma__gloss'),  
+                    Lower('trefwoord__woord'), 
+                    Lower('woord'), 
+                    Lower('toelichting'), 
+                    Lower('dialect__stad'))
             else:
-                lstQ.append(Q(entry__dialect__nieuw__iregex=val))
-            bHasFilter = True
-
-        # Check for dialect word, which is a direct member of Entry
-        if 'woord' in get and get['woord'] != '':
-            val = adapt_search(get['woord'])
-            if self.strict:
-                lstQ.append(Q(woord__iregex=val))
-            else:
-                lstQ.append(Q(entry__woord__iregex=val))
-            bHasFilter = True
-
-        # Check for aflevering
-        if 'aflevering' in get and get['aflevering'] != '':
-            # What we get should be a number
-            val = get['aflevering']
-            if val.isdigit():
-                iVal = int(val)
-                if iVal>0:
-                    if self.strict:
-                        lstQ.append(Q(aflevering__id=iVal))
-                    else:
-                        lstQ.append(Q(entry__aflevering__id=iVal))
-                    bHasFilter = True
-
-        # Check for mijn
-        if 'mijn' in get and get['mijn'] != '':
-            # What we get should be a number
-            val = get['mijn']
-            if val.isdigit():
-                iVal = int(val)
-                if iVal>0:
-                    if self.strict:
-                        lstQ.append(Q(mijnlijst__id=iVal))
-                    else:
-                        lstQ.append(Q(entry__mijnlijst__id=iVal))
-                    bHasFilter = True
-
-        # Make sure we filter on aflevering.toonbaar
-        if self.strict:
-            lstQ.append(Q(aflevering__toonbaar=True))
-        else:
-            lstQ.append(Q(entry__aflevering__toonbaar=True))
-
-        if self.bDoTime: print("LemmaListView get_entryset part 2: {:.1f}".format(get_now_time() - iStart))
-
-        # Make the QSE available
-        # Order: "lemma_gloss", "trefwoord_woord", "dialectopgave", "dialect_stad"
-        if self.bDoTime: iStart = get_now_time()
-        if self.bOrderWrdToel:
-            qse = Entry.objects.filter(*lstQ).distinct().select_related().order_by(
-                Lower('lemma__gloss'),  
-                Lower('trefwoord__woord'), 
-                Lower('woord'), 
-                Lower('toelichting'), 
-                Lower('dialect__stad'))
-        else:
-            qse = Entry.objects.filter(*lstQ).distinct().select_related().order_by(
-                Lower('lemma__gloss'),  
-                Lower('trefwoord__woord'), 
-                Lower('toelichting'), 
-                Lower('woord'), 
-                Lower('dialect__stad'))
-        if self.bDoTime: print("LemmaListView get_entryset part 3: {:.1f}".format(get_now_time() - iStart))
-        # x = str(Entry.objects.filter(*lstQ).distinct().select_related().query)
-        self.qEntry = qse
+                qse = Entry.objects.filter(*lstQ).distinct().select_related().order_by(
+                    Lower('lemma__gloss'),  
+                    Lower('trefwoord__woord'), 
+                    Lower('toelichting'), 
+                    Lower('woord'), 
+                    Lower('dialect__stad'))
+            if self.bDoTime: print("LemmaListView get_entryset part 3: {:.1f}".format(get_now_time() - iStart))
+            # x = str(Entry.objects.filter(*lstQ).distinct().select_related().query)
+            self.qEntry = qse
+        except:
+            msg = oErr.get_error_message()
+            oErr.DoError("LemmaListView/get_entryset")
         return qse
 
     def get_queryset(self):
         oErr = ErrHandle()
+        qse = Lemma.objects.none()
         try:
             # Measure how long it takes
             if self.bDoTime:
@@ -1595,7 +1607,7 @@ class LemmaListView(ListView):
                 print("LemmaListView get_queryset point 'b': {:.1f}".format( get_now_time() - iStart))
         except:
             msg = oErr.get_error_message()
-            oErr.DoError("LemmaListView")
+            oErr.DoError("LemmaListView/get_queryset")
             qse = Lemma.objects.none()
 
         # Return the resulting filtered and sorted queryset
@@ -1863,156 +1875,171 @@ class LocationListView(ListView):
         bHasSearch = False
         bHasFilter = False
 
-        # Time measurement
-        if self.bDoTime: iStart = get_now_time()
+        qse = Entry.objects.none()
 
-        # Initialize the filtering on ENTRY
-        dialect_list = [item.id for item in page_obj]
-        lstQ.append(Q(dialect__id__in=dialect_list))
+        oErr = ErrHandle()
+        try:
+            # Time measurement
+            if self.bDoTime: iStart = get_now_time()
 
-        # Make sure we filter on aflevering.toonbaar
-        lstQ.append(Q(aflevering__toonbaar=True))
+            # Initialize the filtering on ENTRY
+            dialect_list = [item.id for item in page_obj]
+            lstQ.append(Q(dialect__id__in=dialect_list))
 
-        # Time measurement
-        if self.bDoTime:
-            print("LocationListView get_entryset (point 'e:a'): {:.1f}".format( get_now_time() - iStart))
-            iStart = get_now_time()
+            # Make sure we filter on aflevering.toonbaar
+            lstQ.append(Q(aflevering__toonbaar=True))
 
-        # Get the parameters passed on with the GET or the POST request
-        get = self.request.GET if self.request.method == "GET" else self.request.POST
+            # Time measurement
+            if self.bDoTime:
+                print("LocationListView get_entryset (point 'e:a'): {:.1f}".format( get_now_time() - iStart))
+                iStart = get_now_time()
 
-        # Check for aflevering
-        if 'aflevering' in get and get['aflevering'] != '':
-            # What we get should be a number
-            val = get['aflevering']
-            if val.isdigit():
-                iVal = int(val)
-                if iVal>0:
-                    lstQ.append(Q(aflevering__id=iVal) )
-                    bHasFilter = True
+            # Get the parameters passed on with the GET or the POST request
+            get = self.request.GET if self.request.method == "GET" else self.request.POST
 
-        # Check for mijn
-        if self.bUseMijnen and 'mijn' in get and get['mijn'] != '':
-            # What we get should be a number
-            val = get['mijn']
-            if val.isdigit():
-                iVal = int(val)
-                if iVal>0:
-                    lstQ.append(Q(mijnlijst__id=iVal) )
-                    bHasFilter = True
+            # Check for aflevering
+            if 'aflevering' in get and get['aflevering'] != '':
+                # What we get should be a number
+                val = get['aflevering']
+                if val.isdigit():
+                    iVal = int(val)
+                    if iVal>0:
+                        lstQ.append(Q(aflevering__id=iVal) )
+                        bHasFilter = True
 
-        bUseLower = True
-        if bUseLower:
-            qse = Entry.objects.filter(*lstQ).distinct().select_related().order_by(
-                Lower('dialect__stad'),
-                'lemma__gloss',  
-                Lower('trefwoord__woord'), 
-                Lower('toelichting'), 
-                Lower('woord'))
-        else:
-            qse = Entry.objects.filter(*lstQ).distinct().select_related().order_by(
-                'dialect__stad',
-                'lemma__gloss',  
-                'trefwoord__woord', 
-                'toelichting', 
-                'woord')
+            # Check for mijn
+            if self.bUseMijnen and 'mijn' in get and get['mijn'] != '':
+                # What we get should be a number
+                val = get['mijn']
+                if val.isdigit():
+                    iVal = int(val)
+                    if iVal>0:
+                        lstQ.append(Q(mijnlijst__id=iVal) )
+                        bHasFilter = True
 
-        # Time measurement
-        if self.bDoTime:
-            print("LocationListView get_entryset (point 'e:b'): {:.1f}".format( get_now_time() - iStart))
+            bUseLower = True
+            if bUseLower:
+                qse = Entry.objects.filter(*lstQ).distinct().select_related().order_by(
+                    Lower('dialect__stad'),
+                    'lemma__gloss',  
+                    Lower('trefwoord__woord'), 
+                    Lower('toelichting'), 
+                    Lower('woord'))
+            else:
+                qse = Entry.objects.filter(*lstQ).distinct().select_related().order_by(
+                    'dialect__stad',
+                    'lemma__gloss',  
+                    'trefwoord__woord', 
+                    'toelichting', 
+                    'woord')
 
-        self.qEntry = qse
+            # Time measurement
+            if self.bDoTime:
+                print("LocationListView get_entryset (point 'e:b'): {:.1f}".format( get_now_time() - iStart))
 
-        qse = list(qse)
-        # Time measurement
-        if self.bDoTime:
-            print("LocationListView get_entryset (point 'e:c'): {:.1f}".format( get_now_time() - iStart))
+            self.qEntry = qse
+
+            qse = list(qse)
+            # Time measurement
+            if self.bDoTime:
+                print("LocationListView get_entryset (point 'e:c'): {:.1f}".format( get_now_time() - iStart))
+
+        except:
+            msg = oErr.get_error_message()
+            oErr.DoError("LocationListView/get_entryset")
 
         return qse
 
     def get_queryset(self):
-        # Get the parameters passed on with the GET or the POST request
-        get = self.request.GET if self.request.method == "GET" else self.request.POST
-        # Not sure why, but get a copy
-        get = get.copy()
+        oErr = ErrHandle()
+        qs = Dialect.objects.none()
+        try:
+            # Get the parameters passed on with the GET or the POST request
+            get = self.request.GET if self.request.method == "GET" else self.request.POST
+            # Not sure why, but get a copy
+            get = get.copy()
 
-        # Measure how long it takes
-        if self.bDoTime:
-            iStart = get_now_time()
+            # Measure how long it takes
+            if self.bDoTime:
+                iStart = get_now_time()
 
-        # Set the [sortOrder] parameter to 'stad' (the name of the city)
-        get['sortOrder'] = 'stad'
+            # Set the [sortOrder] parameter to 'stad' (the name of the city)
+            get['sortOrder'] = 'stad'
 
-        # Get possible user choice of 'strict'
-        if 'strict' in get:
-            self.strict = (get['strict'] == "True")
+            # Get possible user choice of 'strict'
+            if 'strict' in get:
+                self.strict = (get['strict'] == "True")
 
-        # Queryset: build a list of requirements
-        lstQ = []
-        bHasSearch = False
-        bHasFilter = False
+            # Queryset: build a list of requirements
+            lstQ = []
+            bHasSearch = False
+            bHasFilter = False
 
-        # Fine-tuning: search string is the STAD
-        if 'search' in get and get['search'] != '':
-            val = adapt_search(get['search'])
-            lstQ.append(Q(stad__iregex=val) )
-            bHasSearch = True
+            # Fine-tuning: search string is the STAD
+            if 'search' in get and get['search'] != '':
+                val = adapt_search(get['search'])
+                lstQ.append(Q(stad__iregex=val) )
+                bHasSearch = True
 
-            # check for possible exact numbers having been given
-            if re.match('^\d+$', val):
-                query = query | Q(sn__exact=val)
-                lstQ.append(Q(sn__exact=val))
+                # check for possible exact numbers having been given
+                if re.match('^\d+$', val):
+                    query = query | Q(sn__exact=val)
+                    lstQ.append(Q(sn__exact=val))
 
-        # Check for dialect code (Kloeke)
-        if 'nieuw' in get and get['nieuw'] != '':
-            val = adapt_search(get['nieuw'])
-            lstQ.append(Q(nieuw__iregex=val) )
-            bHasSearch = True
+            # Check for dialect code (Kloeke)
+            if 'nieuw' in get and get['nieuw'] != '':
+                val = adapt_search(get['nieuw'])
+                lstQ.append(Q(nieuw__iregex=val) )
+                bHasSearch = True
 
-        # Check for aflevering
-        if 'aflevering' in get and get['aflevering'] != '':
-            # What we get should be a number
-            val = get['aflevering']
-            if val.isdigit():
-                iVal = int(val)
-                if iVal>0:
-                    lstQ.append(Q(entry__aflevering__id=iVal) )
-                    bHasFilter = True
+            # Check for aflevering
+            if 'aflevering' in get and get['aflevering'] != '':
+                # What we get should be a number
+                val = get['aflevering']
+                if val.isdigit():
+                    iVal = int(val)
+                    if iVal>0:
+                        lstQ.append(Q(entry__aflevering__id=iVal) )
+                        bHasFilter = True
 
-        # Check for mijn
-        if self.bUseMijnen and 'mijn' in get and get['mijn'] != '':
-            # What we get should be a number
-            val = get['mijn']
-            if val.isdigit():
-                iVal = int(val)
-                if iVal>0:
-                    lstQ.append(Q(entry__mijnlijst__id=iVal) )
-                    bHasFilter = True
+            # Check for mijn
+            if self.bUseMijnen and 'mijn' in get and get['mijn'] != '':
+                # What we get should be a number
+                val = get['mijn']
+                if val.isdigit():
+                    iVal = int(val)
+                    if iVal>0:
+                        lstQ.append(Q(entry__mijnlijst__id=iVal) )
+                        bHasFilter = True
 
-        # Time measurement
-        if self.bDoTime:
-            print("LocationListView get_queryset point 'a': {:.1f}".format( get_now_time() - iStart))
-            iStart = get_now_time()
+            # Time measurement
+            if self.bDoTime:
+                print("LocationListView get_queryset point 'a': {:.1f}".format( get_now_time() - iStart))
+                iStart = get_now_time()
 
-        # Get a list of Dialects that should be excluded
-        dialect_hide = Dialect.objects.filter(toonbaar=0)
+            # Get a list of Dialects that should be excluded
+            dialect_hide = Dialect.objects.filter(toonbaar=0)
 
-        # Use the E-WBD approach: be efficient here
-        qs = Dialect.objects.exclude(id__in=dialect_hide).filter(*lstQ).distinct().select_related().order_by(Lower('stad'))
+            # Use the E-WBD approach: be efficient here
+            qs = Dialect.objects.exclude(id__in=dialect_hide).filter(*lstQ).distinct().select_related().order_by(Lower('stad'))
 
-        # Time measurement
-        if self.bDoTime:
-            print("LocationListView get_queryset point 'c': {:.1f}".format( get_now_time() - iStart))
-            iStart = get_now_time()
+            # Time measurement
+            if self.bDoTime:
+                print("LocationListView get_queryset point 'c': {:.1f}".format( get_now_time() - iStart))
+                iStart = get_now_time()
 
-        # self.entrycount = qs.count()
-        # Using 'len' is faster since [qse] is being actually used again
-        self.entrycount = len(qs)
+            # self.entrycount = qs.count()
+            # Using 'len' is faster since [qse] is being actually used again
+            self.entrycount = len(qs)
 
-        # Time measurement
-        if self.bDoTime:
-            print("LocationListView get_queryset point 'd': {:.1f}".format( get_now_time() - iStart))
-            iStart = get_now_time()
+            # Time measurement
+            if self.bDoTime:
+                print("LocationListView get_queryset point 'd': {:.1f}".format( get_now_time() - iStart))
+                iStart = get_now_time()
+
+        except:
+            msg = oErr.get_error_message()
+            oErr.DoError("LocationListView/get_queryset")
 
         # Return the resulting filtered and sorted queryset
         return qs
@@ -2110,54 +2137,61 @@ class DialectListView(ListView):
         return self.request.GET.get('paginate_by', self.paginate_by)
         
     def get_queryset(self):
-        # Measure how long it takes
-        if self.bDoTime: iStart = get_now_time()
+        oErr = ErrHandle()
+        qs = Dialect.objects.none()
+        try:
+            # Measure how long it takes
+            if self.bDoTime: iStart = get_now_time()
 
-        # Get the parameters passed on with the GET or the POST request
-        get = self.request.GET if self.request.method == "GET" else self.request.POST
-        get = get.copy()
-        self.get = get
+            # Get the parameters passed on with the GET or the POST request
+            get = self.request.GET if self.request.method == "GET" else self.request.POST
+            get = get.copy()
+            self.get = get
 
-        # Fix the sort-order
-        get['sortOrder'] = 'stad'
+            # Fix the sort-order
+            get['sortOrder'] = 'stad'
 
-        lstQ = []
+            lstQ = []
 
-        # Fine-tuning: search string is the LEMMA
-        if 'search' in get and get['search'] != '':
-            val = adapt_search(get['search'])
-            query = Q(stad__iregex=val) 
+            # Fine-tuning: search string is the LEMMA
+            if 'search' in get and get['search'] != '':
+                val = adapt_search(get['search'])
+                query = Q(stad__iregex=val) 
 
-            # check for possible exact numbers having been given
-            if re.match('^\d+$', val):
-                query = query | Q(sn__exact=val)
+                # check for possible exact numbers having been given
+                if re.match('^\d+$', val):
+                    query = query | Q(sn__exact=val)
 
-            # Apply the filter
-            lstQ.append(query)
+                # Apply the filter
+                lstQ.append(query)
 
-        # Check for dialect code (Kloeke)
-        if 'nieuw' in get and get['nieuw'] != '':
-            val = adapt_search(get['nieuw'])
-            query = Q(nieuw__iregex=val)
+            # Check for dialect code (Kloeke)
+            if 'nieuw' in get and get['nieuw'] != '':
+                val = adapt_search(get['nieuw'])
+                query = Q(nieuw__iregex=val)
             
-            # Apply the filter
-            lstQ.append(query)
+                # Apply the filter
+                lstQ.append(query)
 
-        # Calculate the final qs
-        qs = Dialect.objects.exclude(toonbaar=0).filter(*lstQ).order_by('stad').distinct()
+            # Calculate the final qs
+            qs = Dialect.objects.exclude(toonbaar=0).filter(*lstQ).order_by('stad').distinct()
 
-        # Time measurement
-        if self.bDoTime:
-            print("DialectListView get_queryset point 'a': {:.1f}".format( get_now_time() - iStart))
-            print("DialectListView query: {}".format(qs.query))
-            iStart = get_now_time()
+            # Time measurement
+            if self.bDoTime:
+                print("DialectListView get_queryset point 'a': {:.1f}".format( get_now_time() - iStart))
+                print("DialectListView query: {}".format(qs.query))
+                iStart = get_now_time()
 
-        # Determine the length
-        self.entrycount = len(qs)
+            # Determine the length
+            self.entrycount = len(qs)
 
-        # Time measurement
-        if self.bDoTime:
-            print("DialectListView get_queryset point 'b': {:.1f}".format( get_now_time() - iStart))
+            # Time measurement
+            if self.bDoTime:
+                print("DialectListView get_queryset point 'b': {:.1f}".format( get_now_time() - iStart))
+
+        except:
+            msg = oErr.get_error_message()
+            oErr.DoError("DialectListView/get_queryset")
 
         # Return the resulting filtered and sorted queryset
         return qs
@@ -2202,147 +2236,154 @@ class DialectCheckView(ListView):
     template_name = 'dictionary/dialect_check.html'
 
     def get_context_data(self, **kwargs):
-        # Retrieve the default context
-        context = super(DialectCheckView, self).get_context_data(**kwargs)
+        context = {}
+        oErr = ErrHandle()
+        try:
+            # Retrieve the default context
+            context = super(DialectCheckView, self).get_context_data(**kwargs)
 
-        def get_range(qs, d, s):
-            """Get the afleveringen belonging to d/s as a range-string"""
+            def get_range(qs, d, s):
+                """Get the afleveringen belonging to d/s as a range-string"""
 
-            lstQ = []
-            lstQ.append(Q(deel__nummer=d))
-            if s != None:
-                lstQ.append(Q(sectie=s))
-                sBack = "{}/{}:".format(d,s)
-            else:
-                sBack = "{}:".format(d)
-            # qsr = qs.objects.filter(*lstQ).order_by('aflnum')
-            # qsr = Aflevering.objects.filter(id__in=qs).filter(*lstQ).order_by('aflnum')
-            qsr = qs.filter(*lstQ).order_by('aflnum')
-            if qsr.count() == 0:
-                return ""
-            # Initializations
-            prev_num = -1
-            bRange = False  # In a range or not
-            for item in qsr:
-                num = item.aflnum
-                if prev_num == -1:
+                lstQ = []
+                lstQ.append(Q(deel__nummer=d))
+                if s != None:
+                    lstQ.append(Q(sectie=s))
+                    sBack = "{}/{}:".format(d,s)
+                else:
+                    sBack = "{}:".format(d)
+                # qsr = qs.objects.filter(*lstQ).order_by('aflnum')
+                # qsr = Aflevering.objects.filter(id__in=qs).filter(*lstQ).order_by('aflnum')
+                qsr = qs.filter(*lstQ).order_by('aflnum')
+                if qsr.count() == 0:
+                    return ""
+                # Initializations
+                prev_num = -1
+                bRange = False  # In a range or not
+                for item in qsr:
+                    num = item.aflnum
+                    if prev_num == -1:
+                        sBack += "{}".format(num)
+                    elif prev_num + 1 == num:
+                        # We are in a range
+                        if not bRange:
+                            # Indicate we are inside a range
+                            sBack += "-"
+                            bRange = True
+                    elif prev_num + 1 != num:
+                        if bRange:
+                            # Finish previous range and start a new one
+                            sBack += "{},{}".format(prev_num, num)
+                            bRange = False
+                        else:
+                            # Start a range
+                            sBack += ",{}".format(num)
+                    # Adapt the previous number
+                    prev_num = num
+                # Check if we are still in the range
+                if bRange:
+                    # Finish this range
                     sBack += "{}".format(num)
-                elif prev_num + 1 == num:
-                    # We are in a range
-                    if not bRange:
-                        # Indicate we are inside a range
-                        sBack += "-"
-                        bRange = True
-                elif prev_num + 1 != num:
-                    if bRange:
-                        # Finish previous range and start a new one
-                        sBack += "{},{}".format(prev_num, num)
-                        bRange = False
-                    else:
-                        # Start a range
-                        sBack += ",{}".format(num)
-                # Adapt the previous number
-                prev_num = num
-            # Check if we are still in the range
-            if bRange:
-                # Finish this range
-                sBack += "{}".format(num)
-            return sBack
+                return sBack
 
-        # The set of ranges that cen be looked at
-        ranges = [{'d': 1, 's': None}, {'d': 2, 's': None}, {'d': 3, 's': 1}, {'d': 3, 's': 2}, {'d': 3, 's': 3}, {'d': 3, 's': 4}]
+            # The set of ranges that cen be looked at
+            ranges = [{'d': 1, 's': None}, {'d': 2, 's': None}, {'d': 3, 's': 1}, {'d': 3, 's': 2}, {'d': 3, 's': 3}, {'d': 3, 's': 4}]
 
-        # Add my own stuff to the context
-        # (1) Get a list of unique dialect names
-        qs = Dialect.objects.order_by(Lower('stad')).distinct().select_related()
-        d_list = []
-        for item in qs:
-            d_list.append({'id': item.id, 'stad': item.stad, 'nieuw': item.nieuw})
-        context['d_list']  = d_list
+            # Add my own stuff to the context
+            # (1) Get a list of unique dialect names
+            qs = Dialect.objects.order_by(Lower('stad')).distinct().select_related()
+            d_list = []
+            for item in qs:
+                d_list.append({'id': item.id, 'stad': item.stad, 'nieuw': item.nieuw})
+            context['d_list']  = d_list
 
-        # (2) Get a list of unique kloekecodes
-        qs = Dialect.objects.order_by(Lower('nieuw')).distinct().select_related()
-        k_list = []
-        for item in qs:
-            k_list.append({'id': item.id, 'stad': item.stad, 'nieuw': item.nieuw})
-        context['k_list']  = k_list
+            # (2) Get a list of unique kloekecodes
+            qs = Dialect.objects.order_by(Lower('nieuw')).distinct().select_related()
+            k_list = []
+            for item in qs:
+                k_list.append({'id': item.id, 'stad': item.stad, 'nieuw': item.nieuw})
+            context['k_list']  = k_list
 
 
-        # (3) Get a list of all names that have more than one entry (modula case)
-        d_double = []
-        last_stad = ""
-        for item in d_list:
-            name = item['stad']
-            if name != last_stad:
-                last_stad = name
-                qs = Dialect.objects.filter(Q(stad__iexact=name))
-                if qs.count()>1:
-                    # Get all the codes and all the afl for this name
-                    lCode = []
-                    lAfl = []
-                    for d in qs:
-                        # Get all the entries that point to this dialect
-                        qse = Entry.objects.filter(dialect=d).distinct()
-                        qse_count = qse.count()
-                        # Check the code (nieuw) for this dialect
-                        if not d.nieuw in lCode:
-                            lCode.append({'nieuw': d.nieuw,'num': qse_count})
-                        # Check all the afl for this dialect
-                        qsa = Aflevering.objects.filter(aflevering_entries__in=qse).distinct()
-                        for a in qsa:
-                            if not a.id in lAfl: lAfl.append(a.id)
-                    # Sort the list of afl
-                    qsa = Aflevering.objects.filter(id__in=lAfl).select_related().order_by('deel', 'sectie', 'aflnum')
-                    lAfl = []
-                    # Get a number of standard ranges
-                    for oRange in ranges:
-                        sBack = get_range(qsa, oRange['d'], oRange['s'])
-                        if sBack != "": lAfl.append(sBack)
-                    # Get all the afleveringen for this name
-                    oDouble = {'name': name, 'count': qs.count(), 'codes': lCode, 'afl_list': lAfl}
-                    d_double.append(oDouble)
-        context['d_double'] = d_double
+            # (3) Get a list of all names that have more than one entry (modula case)
+            d_double = []
+            last_stad = ""
+            for item in d_list:
+                name = item['stad']
+                if name != last_stad:
+                    last_stad = name
+                    qs = Dialect.objects.filter(Q(stad__iexact=name))
+                    if qs.count()>1:
+                        # Get all the codes and all the afl for this name
+                        lCode = []
+                        lAfl = []
+                        for d in qs:
+                            # Get all the entries that point to this dialect
+                            qse = Entry.objects.filter(dialect=d).distinct()
+                            qse_count = qse.count()
+                            # Check the code (nieuw) for this dialect
+                            if not d.nieuw in lCode:
+                                lCode.append({'nieuw': d.nieuw,'num': qse_count})
+                            # Check all the afl for this dialect
+                            qsa = Aflevering.objects.filter(aflevering_entries__in=qse).distinct()
+                            for a in qsa:
+                                if not a.id in lAfl: lAfl.append(a.id)
+                        # Sort the list of afl
+                        qsa = Aflevering.objects.filter(id__in=lAfl).select_related().order_by('deel', 'sectie', 'aflnum')
+                        lAfl = []
+                        # Get a number of standard ranges
+                        for oRange in ranges:
+                            sBack = get_range(qsa, oRange['d'], oRange['s'])
+                            if sBack != "": lAfl.append(sBack)
+                        # Get all the afleveringen for this name
+                        oDouble = {'name': name, 'count': qs.count(), 'codes': lCode, 'afl_list': lAfl}
+                        d_double.append(oDouble)
+            context['d_double'] = d_double
 
-        # (4) Get a list of all kloekecodes that have more than one entry 
-        k_double = []
-        last_code = ""
-        for item in k_list:
-            code = item['nieuw']
-            if code != last_code:
-                last_code = code
-                # Get all the dialects with this particular kloekecode
-                qs = Dialect.objects.filter(Q(nieuw__iexact=code)).distinct()
-                if qs.count() > 1:
-                    # There is more than one city linked to this kloekecode
-                    lStad = []
-                    lAfl = []
-                    for d in qs:
-                        # Get all the entries that point to this dialect
-                        qse = Entry.objects.filter(dialect=d).distinct()
-                        qse_count = qse.count()
-                        # Check the city name (stad) for this dialect
-                        if not d.stad in lStad:
-                            lStad.append({'stad': d.stad,'num': qse_count})
-                        # Check all the afl for this dialect
-                        qsa = Aflevering.objects.filter(aflevering_entries__in=qse).distinct()
-                        for a in qsa:
-                            if not a.id in lAfl: lAfl.append(a.id)
-                    # Sort the list of afl
-                    qsa = Aflevering.objects.filter(id__in=lAfl).select_related().order_by('deel', 'sectie', 'aflnum')
-                    lAfl = []
-                    # Get a number of standard ranges
-                    for oRange in ranges:
-                        sBack = get_range(qsa, oRange['d'], oRange['s'])
-                        if sBack != "": lAfl.append(sBack)
-                    # Get all the afleveringen for this code
-                    oDouble = {'code': code, 'count': qs.count(), 'cities': lStad, 'afl_list': lAfl}
-                    k_double.append(oDouble)
+            # (4) Get a list of all kloekecodes that have more than one entry 
+            k_double = []
+            last_code = ""
+            for item in k_list:
+                code = item['nieuw']
+                if code != last_code:
+                    last_code = code
+                    # Get all the dialects with this particular kloekecode
+                    qs = Dialect.objects.filter(Q(nieuw__iexact=code)).distinct()
+                    if qs.count() > 1:
+                        # There is more than one city linked to this kloekecode
+                        lStad = []
+                        lAfl = []
+                        for d in qs:
+                            # Get all the entries that point to this dialect
+                            qse = Entry.objects.filter(dialect=d).distinct()
+                            qse_count = qse.count()
+                            # Check the city name (stad) for this dialect
+                            if not d.stad in lStad:
+                                lStad.append({'stad': d.stad,'num': qse_count})
+                            # Check all the afl for this dialect
+                            qsa = Aflevering.objects.filter(aflevering_entries__in=qse).distinct()
+                            for a in qsa:
+                                if not a.id in lAfl: lAfl.append(a.id)
+                        # Sort the list of afl
+                        qsa = Aflevering.objects.filter(id__in=lAfl).select_related().order_by('deel', 'sectie', 'aflnum')
+                        lAfl = []
+                        # Get a number of standard ranges
+                        for oRange in ranges:
+                            sBack = get_range(qsa, oRange['d'], oRange['s'])
+                            if sBack != "": lAfl.append(sBack)
+                        # Get all the afleveringen for this code
+                        oDouble = {'code': code, 'count': qs.count(), 'cities': lStad, 'afl_list': lAfl}
+                        k_double.append(oDouble)
 
-        context['k_double'] = k_double
+            context['k_double'] = k_double
 
-        # (5) Get a list of all dialects that are used, but that do not have a coordinate
-        dc_list = Dialect.objects.filter(coordinate__isnull=True).order_by('stad').values('stad', 'nieuw', 'id')
-        context['dc_list'] = dc_list
+            # (5) Get a list of all dialects that are used, but that do not have a coordinate
+            dc_list = Dialect.objects.filter(coordinate__isnull=True).order_by('stad').values('stad', 'nieuw', 'id')
+            context['dc_list'] = dc_list
+
+        except:
+            msg = oErr.get_error_message()
+            oErr.DoError("DialectCheckView/get_context_data")
 
         # Return the context
         return context
@@ -2361,31 +2402,38 @@ class MijnListView(ListView):
 
 
     def get_context_data(self, **kwargs):
-        # Call the base implementation first to get a context
-        context = super(MijnListView, self).get_context_data(**kwargs)
+        oErr = ErrHandle()
+        context = {}
+        try:
+            # Call the base implementation first to get a context
+            context = super(MijnListView, self).get_context_data(**kwargs)
 
-        # Get parameters for the search
-        initial = self.request.GET
-        search_form = MijnSearchForm(initial)
+            # Get parameters for the search
+            initial = self.request.GET
+            search_form = MijnSearchForm(initial)
 
-        context['searchform'] = search_form
+            context['searchform'] = search_form
 
-        # Determine the count 
-        context['entrycount'] = self.get_queryset().count()
+            # Determine the count 
+            context['entrycount'] = self.get_queryset().count()
 
-        # Make sure the paginate-values are available
-        context['paginateValues'] = paginateValues
+            # Make sure the paginate-values are available
+            context['paginateValues'] = paginateValues
 
-        if 'paginate_by' in initial:
-            context['paginateSize'] = int(initial['paginate_by'])
-        else:
-            context['paginateSize'] = paginateSize
+            if 'paginate_by' in initial:
+                context['paginateSize'] = int(initial['paginate_by'])
+            else:
+                context['paginateSize'] = paginateSize
 
-        # Set the prefix
-        context['app_prefix'] = APP_PREFIX
+            # Set the prefix
+            context['app_prefix'] = APP_PREFIX
 
-        # Set the title of the application
-        context['title'] = "{} mijnen".format(THIS_DICTIONARY)
+            # Set the title of the application
+            context['title'] = "{} mijnen".format(THIS_DICTIONARY)
+
+        except:
+            msg = oErr.get_error_message()
+            oErr.DoError("MijnListView/get_context_data")
 
         # Return the calculated context
         return context
@@ -2397,46 +2445,52 @@ class MijnListView(ListView):
         return self.request.GET.get('paginate_by', self.paginate_by)
         
     def get_queryset(self):
+        qs = Mijn.objects.none()
+        oErr = ErrHandle()
+        try:
+            # Get the parameters passed on with the GET request
+            get = self.request.GET.copy()
+            get['sortOrder'] = 'naam'
 
-        # Get the parameters passed on with the GET request
-        get = self.request.GET.copy()
-        get['sortOrder'] = 'naam'
+            # Queryset: start out with *ALL* the mines
+            qs = Mijn.objects.all()
 
-        # Queryset: start out with *ALL* the mines
-        qs = Mijn.objects.all()
+            # Fine-tuning: search string is the LEMMA
+            if 'search' in get and get['search'] != '':
+                val = adapt_search(get['search'])
+                # The main search is on the NAME of the mine
+                query = Q(naam__iregex=val) 
 
-        # Fine-tuning: search string is the LEMMA
-        if 'search' in get and get['search'] != '':
-            val = adapt_search(get['search'])
-            # The main search is on the NAME of the mine
-            query = Q(naam__iregex=val) 
+                # check for possible exact numbers having been given
+                if re.match('^\d+$', val):
+                    query = query | Q(sn__exact=val)
 
-            # check for possible exact numbers having been given
-            if re.match('^\d+$', val):
-                query = query | Q(sn__exact=val)
+                # Apply the filter
+                qs = qs.filter(query)
 
-            # Apply the filter
-            qs = qs.filter(query)
+            # Check for toelichting
+            if 'toelichting' in get and get['toelichting'] != '':
+                val = adapt_search(get['toelichting'])
+                # query = Q(nieuw__istartswith=val)
+                query = Q(toelichting__iregex=val)
+                qs = qs.filter(query)
 
-        # Check for toelichting
-        if 'toelichting' in get and get['toelichting'] != '':
-            val = adapt_search(get['toelichting'])
-            # query = Q(nieuw__istartswith=val)
-            query = Q(toelichting__iregex=val)
-            qs = qs.filter(query)
+            # Check for locatie
+            if 'locatie' in get and get['locatie'] != '':
+                val = adapt_search(get['locatie'])
+                # query = Q(nieuw__istartswith=val)
+                query = Q(locatie__iregex=val)
+                qs = qs.filter(query)
 
-        # Check for locatie
-        if 'locatie' in get and get['locatie'] != '':
-            val = adapt_search(get['locatie'])
-            # query = Q(nieuw__istartswith=val)
-            query = Q(locatie__iregex=val)
-            qs = qs.filter(query)
+            # Make sure we only have distinct values
+            qs = qs.distinct()
 
-        # Make sure we only have distinct values
-        qs = qs.distinct()
+            # Sort the queryset by the parameters given
+            qs = order_queryset_by_sort_order(get, qs, 'naam')
 
-        # Sort the queryset by the parameters given
-        qs = order_queryset_by_sort_order(get, qs, 'naam')
+        except:
+            msg = oErr.get_error_message()
+            oErr.DoError("MijnListView/get_queryset")
 
         # Return the resulting filtered and sorted queryset
         return qs
@@ -2449,17 +2503,24 @@ class DeelListView(ListView):
     template_name = 'dictionary/aflevering_list.html'
 
     def get_context_data(self, **kwargs):
-        # Call the base implementation first to get a context
-        context = super(DeelListView, self).get_context_data(**kwargs)
+        oErr = ErrHandle()
+        context = {}
+        try:
+            # Call the base implementation first to get a context
+            context = super(DeelListView, self).get_context_data(**kwargs)
 
-        # Set the prefix
-        context['app_prefix'] = APP_PREFIX
+            # Set the prefix
+            context['app_prefix'] = APP_PREFIX
 
-        # Set the title of the application
-        context['title'] = "{} afleveringen".format(THIS_DICTIONARY)
+            # Set the title of the application
+            context['title'] = "{} afleveringen".format(THIS_DICTIONARY)
 
-        context['intro_pdf'] = "wbd-1/1967_Brabantse Dialecten Voorlopige inleiding.pdf"
-        context['intro_op_drie_pdf'] = "wbd-3/2000_Brabantse Dialecten III Inleiding_Compleet.pdf"
+            context['intro_pdf'] = "wbd-1/1967_Brabantse Dialecten Voorlopige inleiding.pdf"
+            context['intro_op_drie_pdf'] = "wbd-3/2000_Brabantse Dialecten III Inleiding_Compleet.pdf"
+
+        except:
+            msg = oErr.get_error_message()
+            oErr.DoError("DeelListView/get_context_data")
 
         # Return the calculated context
         return context

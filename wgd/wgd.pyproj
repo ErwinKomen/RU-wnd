@@ -4,9 +4,9 @@
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <Name>wgd</Name>
     <RootNamespace>wgd</RootNamespace>
-    <InterpreterId>{6ef9c6ab-96b9-4f5e-8d76-5352cd18dc4a}</InterpreterId>
+    <InterpreterId>MSBuild|ewdict|$(MSBuildProjectFullPath)</InterpreterId>
     <WebBrowserPort>6502</WebBrowserPort>
-    <InterpreterVersion>3.5</InterpreterVersion>
+    <SuppressConfigureTestFrameworkPrompt>true</SuppressConfigureTestFrameworkPrompt>
   </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -21,6 +21,7 @@
     <LaunchProvider>Web launcher</LaunchProvider>
     <DjangoSettingsModule>wgd.settings</DjangoSettingsModule>
     <OutputPath>.</OutputPath>
+    <WebBrowserUrl>http://localhost</WebBrowserUrl>
     <WebBrowserUrl>http://localhost</WebBrowserUrl>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -55,6 +56,7 @@
     <Compile Include="wgd\mapview\apps.py" />
     <Compile Include="wgd\mapview\models.py" />
     <Compile Include="wgd\mapview\tests.py" />
+    <Compile Include="wgd\mapview\utils.py" />
     <Compile Include="wgd\mapview\views.py" />
     <Compile Include="wgd\mapview\__init__.py" />
     <Compile Include="wgd\utils.py" />
@@ -64,6 +66,7 @@
     <Compile Include="wgd\wsgi.py" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="codemeta.json" />
     <Content Include="requirements.txt" />
     <Content Include="wgd\dictionary\static\dictionary\content\boeken-wgd.jpg" />
     <Content Include="wgd\dictionary\static\dictionary\content\bootstrap.css" />
@@ -77,7 +80,6 @@
     <Content Include="wgd\dictionary\static\dictionary\fonts\glyphicons-halflings-regular.svg" />
     <Content Include="wgd\dictionary\static\dictionary\fonts\glyphicons-halflings-regular.ttf" />
     <Content Include="wgd\dictionary\static\dictionary\fonts\glyphicons-halflings-regular.woff" />
-    <None Include="wgd\dictionary\static\dictionary\scripts\_references.js" />
     <Content Include="wgd\dictionary\static\dictionary\scripts\bootstrap.js" />
     <Content Include="wgd\dictionary\static\dictionary\scripts\bootstrap.min.js" />
     <Content Include="wgd\dictionary\static\dictionary\scripts\diadict.js" />
@@ -192,15 +194,13 @@
   </ItemGroup>
   <ItemGroup>
     <Interpreter Include="..\..\..\..\..\env\ewdict\">
-      <Id>{6ef9c6ab-96b9-4f5e-8d76-5352cd18dc4a}</Id>
-      <BaseInterpreter>{9a7a9026-48c1-4688-9d5d-e5699d47d074}</BaseInterpreter>
-      <Version>3.5</Version>
-      <Description>ewdict (Python 64-bit 3.5)</Description>
+      <Id>ewdict</Id>
+      <Version>3.7</Version>
+      <Description>ewdict (Python 3.7 (64-bit))</Description>
       <InterpreterPath>Scripts\python.exe</InterpreterPath>
       <WindowsInterpreterPath>Scripts\pythonw.exe</WindowsInterpreterPath>
-      <LibraryPath>Lib\</LibraryPath>
       <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
-      <Architecture>Amd64</Architecture>
+      <Architecture>X64</Architecture>
     </Interpreter>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.Django.targets" />
