@@ -9,7 +9,11 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth.views import LoginView, LogoutView
 import django.contrib.auth.views
+from django.shortcuts import redirect
+from django.urls import reverse, reverse_lazy, path
 from django.views.decorators.csrf import csrf_exempt
+from django.views.generic.base import RedirectView
+from django.views.generic import TemplateView
 
 # Enable the admin:
 from wgd.settings import APP_PREFIX, STATIC_ROOT
@@ -19,12 +23,6 @@ import wgd.dictionary.forms
 from wgd.dictionary.views import *
 from wgd.dictionary.adminviews import EntryListView, InfoListView
 
-# Other Django stuff
-# from django.core import urlresolvers
-from django.shortcuts import redirect
-from django.urls import reverse, reverse_lazy
-from django.views.generic.base import RedirectView
-from django.views.generic import TemplateView
 
 admin.autodiscover()
 
@@ -34,9 +32,16 @@ admin.site.site_title = 'e-WGD Site Admin'
 
 pfx = APP_PREFIX
 
+# ================ Custom error handling when debugging =============
+def custom_page_not_found(request, exception=None):
+    return wgd.dictionary.views.view_404(request)
+
+handler404 = custom_page_not_found
+
 urlpatterns = [
     # Examples:
     url(r'^$', wgd.dictionary.views.home, name='home'),
+    path("404/", custom_page_not_found),
     url(r'^contact$', wgd.dictionary.views.contact, name='contact'),
     url(r'^about', wgd.dictionary.views.about, name='about'),
     url(r'^guide', wgd.dictionary.views.guide, name='guide'),
@@ -65,9 +70,12 @@ urlpatterns = [
     url(r'^entry/(?P<pk>\d+)', DictionaryDetailView.as_view(), name='output'),
     url(r'^import/start/$', wgd.dictionary.views.import_csv_start, name='import_start'),
     url(r'^import/progress/$', wgd.dictionary.views.import_csv_progress, name='import_progress'),
+
+    url(r'^compare/$', permission_required('dictionary.search_gloss')(wgd.dictionary.views.do_compare), name='compare'),
     url(r'^repair/$', permission_required('dictionary.search_gloss')(wgd.dictionary.views.do_repair), name='repair'),
     url(r'^repair/start/$', wgd.dictionary.views.do_repair_start, name='repair_start'),
     url(r'^repair/progress/$', wgd.dictionary.views.do_repair_progress, name='repair_progress'),
+
     url(r'^static/(?P<path>.*)$',django.views.static.serve, {'document_root': STATIC_ROOT}),
 
     url(r'^login/$', LoginView.as_view

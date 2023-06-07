@@ -340,3 +340,9 @@ body > div > footer a {
     background-color: #f9f2f4;
     border-radius: 4px;
 }
+
+.sent-error {
+    background-color: lightgoldenrodyellow;
+    color: darkred;
+}
+

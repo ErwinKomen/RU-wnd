@@ -229,7 +229,7 @@ def csv_to_excel(sCsvData, response):
     wb.save(response)
     return response
 
-def home(request):
+def home(request, errortype=None):
     """Renders the home page."""
     assert isinstance(request, HttpRequest)
     template_name = "dictionary/index.html"
@@ -245,10 +245,18 @@ def home(request):
     context['count_lemma'] = count_lemma
     context['count_trefwoord'] = count_trefwoord
     context['count_entry'] = count_entry
-    
+
+     # See if this is the result of a particular error
+    if errortype != None:
+        if errortype == "404":
+            context['is_404'] = True
+   
     response = render( request,template_name, context)
     # Return the response
     return response
+
+def view_404(request, *args, **kwargs):
+    return home(request, "404")
 
 def contact(request):
     """Renders the contact page."""
@@ -295,6 +303,22 @@ def do_repair(request):
             'year':datetime.now().year,
         }
     )
+
+def do_compare(request):
+    """Renders the SKIP COMPARE results"""
+
+    assert isinstance(request, HttpRequest)
+
+    sReport = skip_compare()
+    return render(
+        request,
+        'dictionary/repair.html',
+        {   'title':'{} reparatie'.format(THIS_DICTIONARY),
+            'message':'Radboud Universiteit Nijmegen - Dialectenwoordenboek.',
+            'year':datetime.now().year,
+        }
+    )
+
 
 def adapt_search(val):
     # First trim

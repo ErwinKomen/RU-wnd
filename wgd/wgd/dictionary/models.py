@@ -2565,6 +2565,83 @@ def excel_to_fixture(xlsx_file, iDeel, iSectie, iAflevering, iStatus, bUseDbase=
         oErr.DoError("excel_to_fixture", True)
         return oBack
 
+
+def skip_compare():
+    """Compare .skip files looking for curations versus false-negative detection"""
+
+    def get_id_list(sFile):
+        """Given a file, get all its clause-initial ids"""
+
+        oErr = ErrHandle()
+        lBack = []
+        try:
+            # Read the file
+            with open(sFile, "r", encoding="utf-8") as f:
+                reader = csv.reader(f, delimiter="\t")
+                for row in reader:
+                    if len(row) > 0:
+                        id_name = row[0]
+                        if not id_name is None and id_name != "":
+                            lBack.append(id_name)
+        except:
+            msg = oErr.get_error_message()
+            oErr.DoError("get_id_list")
+
+        return lBack
+
+
+    sBack = ""
+    dir_start = "wgd2018"
+    dir_end = "wgd"
+    fix_file = "fixture-d{}-s-a1.skip"
+    oErr = ErrHandle()
+    try:
+        lReport = []
+        lJson = []
+        for idx in range(0,6):
+            deel = idx + 1
+            # Show where we are
+            oErr.Status("Working on skip compare deel {}".format(deel))
+
+            fix_name = fix_file.format(deel)
+            file_start = os.path.abspath( os.path.join(MEDIA_ROOT, dir_start, fix_name))
+            file_end = os.path.abspath( os.path.join(MEDIA_ROOT, dir_end, fix_name))
+
+            # Get the list of id's in start
+            oErr.Status("Reading: {}".format(file_start))
+            lst_start = get_id_list(file_start)
+
+            # Get the list of id's in end
+            oErr.Status("Reading: {}".format(file_end))
+            lst_end = get_id_list(file_end)
+
+            # Get the numbers
+            iCurated = 0
+            for item in lst_start:
+                if not item in lst_end:
+                    iCurated += 1
+
+            iFalseNegative = 0
+            for item in lst_end:
+                if not item in lst_start:
+                    iFalseNegative += 1
+
+            # Report on progress
+            oReport = dict(deel=deel, skip_start=len(lst_start), skip_end=len(lst_end), curated=iCurated, falsenegatives=iFalseNegative)
+            lJson.append(oReport)
+            lReport.append("{}\t{}\t{}\t{}\t{}".format(
+                deel, len(lst_start), len(lst_end), iCurated, iFalseNegative))
+        # Produce the report
+        json.dumps(lReport, indent=2)
+        sBack = "\n".join(lReport)
+        print(sBack)
+    except:
+        msg = oErr.get_error_message()
+        oErr.DoError("skip_compare")
+        sBack = msg
+
+    return sBack
+
 # ----------------------------------------------------------------------------------
 # Name :    csv_to_fixture
 # Goal :    Convert CSV file into a fixtures file
