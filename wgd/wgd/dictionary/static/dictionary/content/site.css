@@ -85,7 +85,7 @@ table tbody tr:hover {
 }
 
 .lemma-word-electronic {
-    color: darkgreen;
+    color: forestgreen; /* darkgreen; */
 }
 
 .lemma-word-toelichting, .trefwoord-word-toelichting {
