@@ -8,6 +8,7 @@ from django.conf.urls import url, include
 from django.conf.urls.static import static
 from django.contrib import admin
 import django.contrib.auth.views
+from django.contrib.auth.views import LoginView, LogoutView
 from django.views.decorators.csrf import csrf_exempt
 
 # Enable the admin:
@@ -19,9 +20,9 @@ from wald.dictionary.views import *
 from wald.dictionary.adminviews import EntryListView, InfoListView
 
 # Other Django stuff
-from django.core import urlresolvers
+# from django.core import urlresolvers
 from django.shortcuts import redirect
-from django.core.urlresolvers import reverse, reverse_lazy
+from django.urls import reverse, reverse_lazy, path
 from django.views.generic.base import RedirectView
 from django.views.generic import TemplateView
 
@@ -33,9 +34,16 @@ admin.site.site_title = 'e-WALD Site Admin'
 
 pfx = APP_PREFIX
 
+# ================ Custom error handling when debugging =============
+def custom_page_not_found(request, exception=None):
+    return wald.dictionary.views.view_404(request)
+
+handler404 = custom_page_not_found
+
 urlpatterns = [
     # Examples:
     url(r'^$', wald.dictionary.views.home, name='home'),
+    path("404/", custom_page_not_found),
     url(r'^contact$', wald.dictionary.views.contact, name='contact'),
     url(r'^about', wald.dictionary.views.about, name='about'),
     url(r'^guide', wald.dictionary.views.guide, name='guide'),
@@ -76,28 +84,36 @@ urlpatterns = [
 
     url(r'^login/user/(?P<user_id>\w[\w\d_]+)$', wald.dictionary.views.login_as_user, name='login_as'),
 
-    url(r'^login/$',
-        django.contrib.auth.views.login,
-        {
-            'template_name': 'dictionary/login.html',
-            'authentication_form': wald.dictionary.forms.BootstrapAuthenticationForm,
-            'extra_context':
-            {
-                'title': 'Log in',
-                'year': datetime.now().year,
-            }
-        },
+    url(r'^login/$', LoginView.as_view
+        (
+            template_name= 'dictionary/login.html',
+            authentication_form= wald.dictionary.forms.BootstrapAuthenticationForm,
+            extra_context= {'title': 'Log in','year': datetime.now().year,}
+        ),
         name='login'),
-    url(r'^logout$',
-        django.contrib.auth.views.logout,
-        {
-            'next_page': reverse_lazy('home'),
-        },
-        name='logout'),
+    url(r'^logout$',  LogoutView.as_view(next_page=reverse_lazy('home')), name='logout'),
+    #url(r'^login/$',
+    #    django.contrib.auth.views.login,
+    #    {
+    #        'template_name': 'dictionary/login.html',
+    #        'authentication_form': wald.dictionary.forms.BootstrapAuthenticationForm,
+    #        'extra_context':
+    #        {
+    #            'title': 'Log in',
+    #            'year': datetime.now().year,
+    #        }
+    #    },
+    #    name='login'),
+    #url(r'^logout$',
+    #    django.contrib.auth.views.logout,
+    #    {
+    #        'next_page': reverse_lazy('home'),
+    #    },
+    #    name='logout'),
 
     # Uncomment the admin/doc line below to enable admin documentation:
-    url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
+    # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     # Uncomment the next line to enable the admin:
-    url(r'^admin/', include(admin.site.urls), name='admin_base'),
+    url(r'^admin/', admin.site.urls, name='admin_base'),
 ]

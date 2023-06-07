@@ -8,7 +8,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView, View
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.template import RequestContext, loader
 from django.template.loader import render_to_string
 from django.db import connection
@@ -159,19 +159,49 @@ def get_item_list(lVar, lFun, qs):
     # Return the list we have made
     return lItem
 
-def home(request):
+def home(request, errortype=None):
     """Renders the home page."""
+
     assert isinstance(request, HttpRequest)
-    return render(
-        request,
-        'dictionary/index.html',
-        {
-            'title': THIS_DICTIONARY,
-            'year':datetime.now().year,
-            'is_app_userplus': user_is_ingroup(request, app_userplus),
-            'is_app_editor': user_is_ingroup(request, app_editor),
-        }
-    )
+    # Specify the template
+    template_name = "dictionary/index.html"
+    # Define the initial context
+    context = dict(title=THIS_DICTIONARY, year=datetime.now().year)
+
+    # Calculate the counts
+    count_dialect = Dialect.objects.count()
+    count_lemma = Lemma.objects.count()
+    count_trefwoord = Trefwoord.objects.count()
+    count_entry = Entry.objects.count()
+    context['count_dialect'] = count_dialect
+    context['count_lemma'] = count_lemma
+    context['count_trefwoord'] = count_trefwoord
+    context['count_entry'] = count_entry
+    context['is_app_userplus'] =user_is_ingroup(request, app_userplus)
+    context['is_app_editor'] = user_is_ingroup(request, app_editor)
+
+    # See if this is the result of a particular error
+    if errortype != None:
+        if errortype == "404":
+            context['is_404'] = True
+
+
+    response = render( request,template_name, context)
+    #return render(
+    #    request,
+    #    'dictionary/index.html',
+    #    {
+    #        'title': THIS_DICTIONARY,
+    #        'year':datetime.now().year,
+    #        'is_app_userplus': user_is_ingroup(request, app_userplus),
+    #        'is_app_editor': user_is_ingroup(request, app_editor),
+    #    }
+    #)
+    # Return the response
+    return response
+
+def view_404(request, *args, **kwargs):
+    return home(request, "404")
 
 def contact(request):
     """Renders the contact page."""

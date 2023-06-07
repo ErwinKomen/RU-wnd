@@ -18,6 +18,9 @@ from django.contrib import admin
 # Get the HOST by IP address
 hst = socket.gethostbyname(socket.gethostname())
 
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = False
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WRITABLE_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../writable/database/"))
@@ -28,16 +31,18 @@ if "RU-wbd\\writable" in WRITABLE_DIR:
     MEDIA_ROOT = os.path.abspath(os.path.join(BASE_DIR, "../../../writable/media/"))
 
 APP_PREFIX = "dd/"
+ADMIN_SITE_URL = ""
 if "d:" in WRITABLE_DIR or "D:" in WRITABLE_DIR:
     APP_PREFIX = ""
+    DEBUG = True
 elif "/scratch" in WRITABLE_DIR or "/var/www" in WRITABLE_DIR or "131.174" in hst:
     # Configuration for http://ewald.science.ru.nl/
     # Also works for http://e-wald.nl
     APP_PREFIX = ""
-    admin.site.site_url = '/'
+    ADMIN_SITE_URL = '/'
 else:
     APP_PREFIX = "ewald/"
-    admin.site.site_url = '/ewald'
+    ADMIN_SITE_URL = '/ewald'
 
 
 # Not the location of the wsgi.py file for "reload_wald"
@@ -45,7 +50,7 @@ WSGI_FILE = os.path.abspath(os.path.join(BASE_DIR,"wald/wsgi.py"))
 
 # publishing on a sub-url
 # NOTE: possibly remove this for the production environment...
-FORCE_SCRIPT_NAME = admin.site.site_url
+# FORCE_SCRIPT_NAME = admin.site.site_url
 
 
 # Quick-start development settings - unsuitable for production
@@ -54,12 +59,8 @@ FORCE_SCRIPT_NAME = admin.site.site_url
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '485c409a-daf7-47d3-81af-257049728c58'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'e-wald.science.ru.nl',
-                 'e-wald.nl', 'www.e-wald.nl', 'wald.science.ru.nl', 
-                 'corpus-studio-web.cttnww-meertens.surf-hosted.nl']
+                 'e-wald.nl', 'www.e-wald.nl']
 
 
 # Application definition
@@ -77,13 +78,13 @@ INSTALLED_APPS = [
     'wald.mapview',
 ]
 
-MIDDLEWARE_CLASSES = [
+MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+    # 'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]

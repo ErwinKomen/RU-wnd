@@ -972,7 +972,7 @@ class Status(models.Model):
     status = models.TextField("Status", blank=False, default="idle")
     method = models.CharField("Reading method", blank=False, max_length=MAX_LEMMA_LEN, default="(unknown)")
     # Link to the Info
-    info = models.ForeignKey(Info, blank=False)
+    info = models.ForeignKey(Info, blank=False, on_delete=models.CASCADE, related_name="info_statuses")
 
     def set_status(self, sStatus, sMsg = None):
         self.status = sStatus
@@ -988,7 +988,7 @@ class StatusUpdate(models.Model):
     status = models.TextField("Status", blank=False, default="idle")
     method = models.CharField("Reading method", blank=False, max_length=MAX_LEMMA_LEN, default="(unknown)")
     # Link to the Info
-    dataupdate = models.ForeignKey(DataUpdate, blank=False)
+    dataupdate = models.ForeignKey(DataUpdate, blank=False, on_delete=models.CASCADE, related_name="dataupdate_statuses")
 
     def set_status(self, sStatus, sMsg = None):
         self.status = sStatus
@@ -1014,7 +1014,7 @@ class Aflevering(models.Model):
     # The 'naam' is the full name of the PDF (without path) in which information is stored
     naam = models.CharField("PDF naam", blank=False, max_length=MAX_LEMMA_LEN, default="(unknown)")
     # The 'deel' is the main category of the books
-    deel = models.ForeignKey(Deel, db_index=True, blank=False)
+    deel = models.ForeignKey(Deel, db_index=True, blank=False, on_delete=models.CASCADE, related_name="deel_afleveringen")
     # The 'sectie' is a sub-category used for instance in deel 3
     sectie = models.IntegerField("Sectie (optioneel)", db_index=True, blank=True, null=True)
     # The 'aflnum' is the actual number of the aflevering 
@@ -1207,15 +1207,15 @@ class Entry(models.Model):
 
     # ================= FOREIGN-KEYS ===========================
     # [1] Aflevering
-    aflevering = models.ForeignKey(Aflevering, db_index=True, blank=False)  #, on_delete=models.CASCADE, related_name="aflevering_entries")
+    aflevering = models.ForeignKey(Aflevering, db_index=True, blank=False, on_delete=models.CASCADE, related_name="aflevering_entries")
     # [1] Lemma: obligatory
-    lemma = models.ForeignKey(Lemma, db_index=True, blank=False)  #, on_delete=models.CASCADE, related_name="lemma_entries")
+    lemma = models.ForeignKey(Lemma, db_index=True, blank=False, on_delete=models.CASCADE, related_name="lemma_entries")
     # [1] Description: this description should be one and the same for a whole lemma, but this is not true in practice
-    descr = models.ForeignKey(Description, db_index=True, blank=False)  #, on_delete=models.CASCADE, related_name="descr_entries")
+    descr = models.ForeignKey(Description, db_index=True, blank=False, on_delete=models.CASCADE, related_name="descr_entries")
     # [1] Dialect: obligatory
-    dialect = models.ForeignKey(Dialect, db_index=True, blank=False)  #, on_delete=models.CASCADE, related_name="dialect_entries")
+    dialect = models.ForeignKey(Dialect, db_index=True, blank=False, on_delete=models.CASCADE, related_name="dialect_entries")
     # [1] Trefwoord: obligatory
-    trefwoord = models.ForeignKey(Trefwoord, db_index=True, blank=False)  #, on_delete=models.CASCADE, related_name="trefwoord_entries")
+    trefwoord = models.ForeignKey(Trefwoord, db_index=True, blank=False, on_delete=models.CASCADE, related_name="trefwoord_entries")
 
     # ============== MANY-TO-MANY fields ====================
     # Mijn [0-n]
