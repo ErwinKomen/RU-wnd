@@ -2567,7 +2567,7 @@ def excel_to_fixture(xlsx_file, iDeel, iSectie, iAflevering, iStatus, bUseDbase=
 
 
 def skip_compare():
-    """Compare .skip files looking for curations versus false-negative detection"""
+    """Compare .skip files looking for curations versus false-positive detection"""
 
     def get_id_list(sFile):
         """Given a file, get all its clause-initial ids"""
@@ -2617,20 +2617,35 @@ def skip_compare():
 
             # Get the numbers
             iCurated = 0
+            # Curated = those in [start], but no longer in [end]
             for item in lst_start:
                 if not item in lst_end:
                     iCurated += 1
 
-            iFalseNegative = 0
+            iFalsePositive = 0
+            # FalsePositive = those in [end], but not yet in [start]
             for item in lst_end:
                 if not item in lst_start:
-                    iFalseNegative += 1
+                    iFalsePositive += 1
+
+            # NOTE: remainder...
+            # BadStuff = those both in [start] as well as in [end]
+
+            # Checksum:
+            #   [start] = BadStuff + Curated
+            #   [end]   = BadStuff + FalsePositives - Curated
+            # Therefore:
+            #   [start] = [end] - FalsePositives + 2 * Curated
+            # BUT:
+            # - [start] has some empty [A] cells
+            # - [end]   has some empty [A] cells
+            #   and these are not the same
 
             # Report on progress
-            oReport = dict(deel=deel, skip_start=len(lst_start), skip_end=len(lst_end), curated=iCurated, falsenegatives=iFalseNegative)
+            oReport = dict(deel=deel, skip_start=len(lst_start), skip_end=len(lst_end), curated=iCurated, falsenegatives=iFalsePositive)
             lJson.append(oReport)
             lReport.append("{}\t{}\t{}\t{}\t{}".format(
-                deel, len(lst_start), len(lst_end), iCurated, iFalseNegative))
+                deel, len(lst_start), len(lst_end), iCurated, iFalsePositive))
         # Produce the report
         json.dumps(lReport, indent=2)
         sBack = "\n".join(lReport)
