@@ -1,1 +1,13 @@
-django ~> 1.11.22
+# ========================================
+# For Ubuntu 20 and Python 3.5-3.8
+# ========================================
+
+django==2.2.24
+openpyxl==2.6.4
+tablib==0.11.2
+
+# Note: 'leaflet' is used, but all relevant JS and CSS are 'on-board'
+# django-leaflet==0.27.1
+
+# Note: there is an uWSGI in the current venv, but it seems to not be used
+# uWSGI      2.0.19.1
