@@ -204,11 +204,19 @@
                   <!-- Treat the list of lemma-descriptions (toelichtingen) and sources (bronnen) for this lemma -->
                   {% spaceless %}
 
-                  <a role="button" class="btn btn-xs" title="Toon trefwoorden op kaart"
+                  <a role="button" class="btn btn-xs" title="Toon trefwoorden op kaart - dialecten"
                      onclick="ru.mapview.lemma_map(this);"
                      targeturl="{% url 'lemmamap' item.entry.lemma.id %}" targetid="" >
                     <i class="far fa-map" style="color: brown;"></i>
                   </a>
+
+                  {% if item.entry.lemma.has_mijnen %}
+                    <a role="button" class="btn btn-xs" title="Toon trefwoorden op kaart - mijnen"
+                       onclick="ru.mapview.lemma_map(this);"
+                       targeturl="{% url 'lemmaminemap' item.entry.lemma.id %}" targetid="" >
+                      <i class="fa fa-map" style="color: darkblue;"></i>
+                    </a>
+                  {% endif %}
 
                   {% for item_descr in item.dlist %}
                     {% if item_descr.descr.first %}<span class="toelichting">{{item_descr.entry.toelichting}}</span>{% endif %}

@@ -499,6 +499,12 @@ class Lemma(models.Model):
             oErr.DoError("Lemma/get_instance error:")
             return None
 
+    def has_mijnen(self):
+        """Check if any of the entries part of this lemma refers to mijnen"""
+
+        bResult = Entry.objects.filter(lemma=self, mijnlijst__isnull=False).exists()
+        return bResult
+
     def change_toonbaar():
         # Set all lemma's to 'toonbaar
         with transaction.atomic():
@@ -989,9 +995,14 @@ class Mijn(models.Model):
     class Meta:
         verbose_name_plural = "Mijnen"
 
+    # [1] The name of the mine
     naam = models.CharField("Mijn", blank=False, max_length=MAX_LEMMA_LEN, default="(unknown)")
+    # [1] The location of the mine as a string
     locatie = models.CharField("Locatie", blank=False, max_length=MAX_LEMMA_LEN, default="(unknown)")
+    # [0-1] optional notes on this mine
     toelichting = models.TextField("Toelichting bij mijn", blank=True)
+    # [0-1] The point coordinates of this mine
+    point = models.CharField("Coordinates", db_index=True, blank=True, max_length=MAX_LEMMA_LEN)
 
     def __str__(self):
         return self.naam

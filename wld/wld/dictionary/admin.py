@@ -1,8 +1,11 @@
 from django.contrib import admin
+from django.contrib.contenttypes.models import ContentType
+from django.forms.widgets import *
+from django.forms import TextInput
 from django import forms
 from django.core import serializers
-from django.contrib.contenttypes.models import ContentType
-from django.forms import TextInput
+
+
 from wld.dictionary.models import *
 import logging
 
@@ -50,6 +53,17 @@ class CoordinateAdmin(admin.ModelAdmin):
     list_display = ['kloeke', 'country', 'province', 'dictionary', 'place', 'point']
     list_filter = ['country', 'province', 'dictionary']
     search_fields = ['place', 'province', 'country', 'kloeke']
+
+
+class MijnAdmin(admin.ModelAdmin):
+    fieldsets = ( ('Editable', {'fields': ('naam', 'locatie', 'toelichting', 'point',)}),
+                )
+    list_display = ['naam', 'locatie', 'point']
+    list_filter = ['naam', 'locatie']
+    search_fields = ['naam', 'locatie']
+    formfield_overrides = {
+        models.TextField: {'widget': Textarea(attrs={'rows': 1, 'class': 'mytextarea'})},
+        }
 
 
 class TrefwoordAdmin(admin.ModelAdmin):
@@ -105,7 +119,7 @@ admin.site.register(Dialect, DialectAdmin)
 admin.site.register(Coordinate, CoordinateAdmin)
 admin.site.register(Trefwoord, TrefwoordAdmin)
 admin.site.register(Aflevering, AfleveringAdmin)
-admin.site.register(Mijn)
+admin.site.register(Mijn, MijnAdmin)
 admin.site.register(Info, InfoAdmin)
 admin.site.register(Description, DescriptionAdmin)
 

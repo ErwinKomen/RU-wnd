@@ -46,6 +46,7 @@ urlpatterns = [
     url(r'^lemmas$', LemmaListView.as_view(), name='lemmas'),
     url(r'^lemma/search/$', LemmaListView.as_view(), name='lemmasearch'),
     url(r'^lemma/map/(?P<pk>\d+)/$', csrf_exempt(LemmaMapView.as_view()), name='lemmamap'),
+    url(r'^lemma/mines/map/(?P<pk>\d+)/$', csrf_exempt(LemmaMineMapView.as_view()), name='lemmaminemap'),
     url(r'^trefwoord/search/$', TrefwoordListView.as_view(), name='trefwoordsearch'),
     url(r'^dialects', DialectListView.as_view(), name='dialects'),
     url(r'^dialect/search/$', DialectListView.as_view(), name='dialectsearch'),

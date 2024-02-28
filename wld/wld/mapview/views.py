@@ -115,6 +115,9 @@ class MapView(DetailView):
 
     def get_popup(self, entry):
         return "(no popup specified)"
+
+    def get_count(self, entry, qs):
+        return None
     
     def post(self, request, *args, **kwargs):
         # Formulate a response
@@ -175,6 +178,7 @@ class MapView(DetailView):
                     oEntry = {}
                     for oItem in self.entry_list:
                         oEntry[oItem['key']] = item[oItem['query']]
+                    oEntry['count'] = self.get_count(oEntry, lst_entry)
                     oEntry['pop_up'] = self.get_popup(oEntry)
                     lst_back.append(oEntry)
 

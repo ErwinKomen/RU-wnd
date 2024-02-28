@@ -1610,6 +1610,61 @@ class LemmaMapView(MapView):
         return pop_up
     
 
+class LemmaMineMapView(MapView):
+    model = Lemma
+    modEntry = Entry
+    frmSearch = LemmaSearchForm
+    order_by = ["trefwoord"]
+    labelfield = "gloss"
+
+    def initialize(self):
+        super(LemmaMineMapView, self).initialize()
+        # Entries with a 'form' value
+        self.add_entry('woord', 'str', 'woord', 'woord')
+        self.add_entry('stad', 'str', 'dialect__stad', 'dialectCity')
+        self.add_entry('kloeke', 'str', 'dialect__nieuw', 'dialectCode')
+        self.add_entry('aflevering', 'int', 'aflevering__id', 'aflevering')
+        self.add_entry('mijn', 'int', 'mijnlijst__id', 'mijn')
+
+        # Entries without a 'form' value
+        self.add_entry('trefwoord', 'str', 'trefwoord__woord')
+        self.add_entry('point', 'str', 'mijnlijst__point')
+        self.add_entry('place', 'str', 'mijnlijst__naam')
+        self.add_entry('alt_point', 'str', 'dialect__coordinate__point')
+        self.add_entry('alt_place', 'str', 'dialect__coordinate__place')
+
+    def get_count(self, oEntry, qs):
+        oErr = ErrHandle()
+        iCount = 1
+        try:
+            iCount = qs.filter(woord=oEntry['woord'], mijnlijst__id=oEntry['mijn']).count()
+            # Double check point
+            if oEntry['point'] is None:
+                oEntry['point'] = oEntry['alt_point']
+        except:
+            msg = oErr.get_error_message()
+            oErr.DoError("LemmaMineMapView/get_count")
+        return iCount
+
+    def get_popup(self, entry):
+        """Create a popup from the 'key' values defined in [initialize()]"""
+
+        oErr = ErrHandle()
+        pop_up = ""
+        try:
+
+            pop_up = '<p class="h6">{}</p>'.format(entry['woord'])
+            pop_up += '<hr style="border: 1px solid green" />'
+            sMijn = "" if entry['place'] == "" else "mijn {} - ".format(entry['place'])
+            sCount = "<b>{}</b>: ".format( entry.get("count", 1))
+            pop_up += '<p style="font-size: smaller;"><span style="color: purple;">{}</span> {}</p>'.format(
+                sCount, sMijn)
+        except:
+            msg = oErr.get_error_message()
+            oErr.DoError("LemmaMineMapView/get_popup")
+        return pop_up
+    
+
 class LocationListView(ListView):
     """Listview of locations"""
 

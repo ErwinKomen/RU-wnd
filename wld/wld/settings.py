@@ -25,15 +25,16 @@ hst = socket.gethostbyname(socket.gethostname())
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WRITABLE_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../writable/database/"))
 MEDIA_ROOT = os.path.abspath(os.path.join(BASE_DIR, "../../writable/media/"))
+ADMIN_SITE_URL = "/"
 if "RU-wld\\writable" in WRITABLE_DIR:
     # Need another string
     WRITABLE_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../../writable/database/"))
     MEDIA_ROOT = os.path.abspath(os.path.join(BASE_DIR, "../../../writable/media/"))
 
-APP_PREFIX = "ewld/"
-ADMIN_SITE_URL = "/"
+APP_PREFIX = ""
 if "d:" in WRITABLE_DIR or "D:" in WRITABLE_DIR:
     APP_PREFIX = ""
+    DEBUG = True
 elif "131.174" in hst:
     # Radboud University environment
     APP_PREFIX = ""
@@ -72,14 +73,14 @@ SECRET_KEY = '485c409a-daf7-47d3-81af-257049728c58'
 
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '131.174.114.202', 'e-wld.science.ru.nl', '192.168.0.1',
-                 'e-wld.nl', 'www.e-wld.nl', 'corpus-studio-web.cttnww-meertens.surf-hosted.nl']
+                 'e-wld.nl', 'www.e-wld.nl']
 
 # Handling email on exceptions
 DEFAULT_FROM_EMAIL = 'diadict@science.ru.nl'
-ADMINS = [('Erwin', 'e.komen@ru.nl')]
+ADMINS = [('Erwin', 'erwin.komen@ru.nl')]
 
 # Use safelogging
-from wld.safelogging.settings import *
+# from wld.safelogging.settings import *
 
 # Application definition
 
@@ -91,15 +92,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'wld.safelogging',
+    'django.contrib.humanize',
+    # 'wld.safelogging',
     # The apps for RU-wld
     'wld.dictionary',
     'wld.mapview',
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
     'wld.utils.BlockedIpMiddleware',
+    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -116,7 +118,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [os.path.join(BASE_DIR, 'wld/templates')],
-        'APP_DIRS': False,
+        # 'APP_DIRS': False,  # This cannot co-occur with 'loaders' in Django 1.9
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -186,8 +188,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
 STATIC_URL = '/static/'
+MEDIA_URL = '/media/'
 if ("ewld" in APP_PREFIX):
     STATIC_URL = '/'+APP_PREFIX+'static/'
+    MEDIA_URL = "/" + APP_PREFIX + "media/"
 
 # STATIC_ROOT = posixpath.join(*(BASE_DIR.split(os.path.sep) + ['static']))
 # The following should be better:
