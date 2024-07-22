@@ -25,6 +25,13 @@ import csv
 import codecs
 import copy
 import sys
+
+# Needed for Excel processing
+import openpyxl
+from openpyxl.utils.cell import get_column_letter
+from openpyxl import Workbook
+
+# ============== Imports from own application ================
 from wld.dictionary.models import *
 from wld.dictionary.forms import *
 from wld.mapview.views import MapView
@@ -32,7 +39,7 @@ from wld.mapview.views import MapView
 from wld.settings import APP_PREFIX, WSGI_FILE
 from wld.dictionary.conversion import rd_to_wgs, wgs_to_rd
 
-# Global variables
+# ============== Global variables =============================
 paginateSize = 10
 paginateLocations = 2
 paginateEntries = 100
@@ -252,9 +259,10 @@ def export_csv(qs, sFileName):
     return response
 
 def export_xlsx(qs, sFileName):
-    import openpyxl
-    from openpyxl.utils.cell import get_column_letter
-    from openpyxl import Workbook
+    """Export information in Excel format"""
+    #import openpyxl
+    #from openpyxl.utils.cell import get_column_letter
+    #from openpyxl import Workbook
 
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename='+sFileName+'.xlsx'
@@ -285,6 +293,51 @@ def export_xlsx(qs, sFileName):
             c.alignment = openpyxl.styles.Alignment(wrap_text=True)
 
     wb.save(response)
+    return response
+
+def export_mijn(qs, sFileName):
+    """Export Excel information with MIJNEN locations"""
+
+    oErr = ErrHandle()
+    response = "empty"
+    try:
+        # Start preparing a response now already 
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename='+sFileName+'.xlsx'
+
+        # Start creating an Excel
+        wb = openpyxl.Workbook()
+        # ws = wb.get_active_sheet()
+        ws = wb.active
+        ws.title = sFileName
+
+        row_num = 0
+
+        # Prepare the columns for the output - using the MIJN output columns
+        dic_column = Mijn.get_columns()
+        lst_mijn = [k for k,v in dic_column.items()]
+        columns = outputColumns + lst_mijn
+        for col_num in range(len(columns)):
+            c = ws.cell(row=row_num + 1, column=col_num + 1)
+            c.value = columns[col_num]
+            # c.style.font.bold = True
+            c.font = openpyxl.styles.Font(bold=True)
+            # Set column width
+            ws.column_dimensions[get_column_letter(col_num+1)].width = 20.0
+
+        # Walk the queryset
+        for obj in qs:
+            row_num += 1
+            row = obj.get_row(dic_column)
+            for col_num in range(len(row)):
+                c = ws.cell(row=row_num + 1, column=col_num + 1)
+                c.value = row[col_num]
+                c.alignment = openpyxl.styles.Alignment(wrap_text=True)
+
+        wb.save(response)
+    except:
+        msg = oErr.get_error_message()
+        oErr.DoError("export_mijn")
     return response
 
 def export_html(qs, sFileName):
@@ -629,15 +682,34 @@ class TrefwoordListView(ListView):
 
     def render_to_response(self, context, **response_kwargs):
         """Check if a CSV response is needed or not"""
-        if 'Csv' in self.request.GET.get('submit_type', ''):
-            """ Provide CSV response"""
+
+        # Get the submit_type, if any
+        submit_type = self.request.GET.get('submit_type', '') or ""
+        submit_type = submit_type.lower().strip()
+        # Action depends on teh submit_type
+        if submit_type == "csv":
+            """ Provide CSV response"""            
             return export_csv(self.get_qs(), 'trefwoorden')
-        elif 'Excel' in self.request.GET.get('submit_type', ''):
-            """ Provide Excel response"""
+        elif submit_type == "excel":
+            """ Provide Excel response"""            
             return export_xlsx(self.get_qs(), 'trefwoorden')
-        elif 'Html' in self.request.GET.get('submit_type', ''):
-            """ Provide Html response"""
+        elif submit_type == "html":
+            """ Provide Html response"""            
             return export_html(self.get_qs(), 'trefwoorden')
+        elif submit_type == "mijn":
+            """ Provide response with an Excel of Mijn locations"""
+            return export_mijn(self.get_qs(), 'trefwoorden')
+
+
+        #if 'Csv' in self.request.GET.get('submit_type', ''):
+        #    """ Provide CSV response"""
+        #    return export_csv(self.get_qs(), 'trefwoorden')
+        #elif 'Excel' in self.request.GET.get('submit_type', ''):
+        #    """ Provide Excel response"""
+        #    return export_xlsx(self.get_qs(), 'trefwoorden')
+        #elif 'Html' in self.request.GET.get('submit_type', ''):
+        #    """ Provide Html response"""
+        #    return export_html(self.get_qs(), 'trefwoorden')
         else:
             oResponse = super(TrefwoordListView, self).render_to_response(context, **response_kwargs)
             return oResponse
@@ -1058,18 +1130,23 @@ class LemmaListView(ListView):
 
     def render_to_response(self, context, **response_kwargs):
         """Check if a CSV response is needed or not"""
-        if 'Csv' in self.request.GET.get('submit_type', ''):
-            """ Provide CSV response"""
-            
+
+        # Get the submit_type, if any
+        submit_type = self.request.GET.get('submit_type', '') or ""
+        submit_type = submit_type.lower().strip()
+        # Action depends on teh submit_type
+        if submit_type == "csv":
+            """ Provide CSV response"""            
             return export_csv(self.get_qs(), 'begrippen')
-        elif 'Excel' in self.request.GET.get('submit_type', ''):
-            """ Provide Excel response"""
-
+        elif submit_type == "excel":
+            """ Provide Excel response"""            
             return export_xlsx(self.get_qs(), 'begrippen')
-        elif 'Html' in self.request.GET.get('submit_type', ''):
-            """ Provide Html response"""
-
+        elif submit_type == "html":
+            """ Provide Html response"""            
             return export_html(self.get_qs(), 'begrippen')
+        elif submit_type == "mijn":
+            """ Provide response with an Excel of Mijn locations"""
+            return export_mijn(self.get_qs(), 'begrippen')
 
         else:
             iStart = get_now_time()
@@ -1702,16 +1779,34 @@ class LocationListView(ListView):
 
     def render_to_response(self, context, **response_kwargs):
         """Check if a CSV response is needed or not"""
-        if 'Csv' in self.request.GET.get('submit_type', ''):
-            """ Provide CSV response"""
-            return export_csv(self.get_qs(), 'plaatsen')
 
-        elif 'Excel' in self.request.GET.get('submit_type', ''):
-            """ Provide Excel response"""
-            return export_xlsx(self.get_qs(), 'plaatsen')
-        elif 'Html' in self.request.GET.get('submit_type', ''):
-            """ Provide Html response"""
-            return export_html(self.get_qs(), 'plaatsen')
+        # Get the submit_type, if any
+        submit_type = self.request.GET.get('submit_type', '') or ""
+        submit_type = submit_type.lower().strip()
+        # Action depends on the submit_type
+        if submit_type == "csv":
+            """ Provide CSV response"""            
+            return export_csv(self.get_qs(), 'trefwoorden')
+        elif submit_type == "excel":
+            """ Provide Excel response"""            
+            return export_xlsx(self.get_qs(), 'trefwoorden')
+        elif submit_type == "html":
+            """ Provide Html response"""            
+            return export_html(self.get_qs(), 'trefwoorden')
+        elif submit_type == "mijn":
+            """ Provide response with an Excel of Mijn locations"""
+            return export_mijn(self.get_qs(), 'trefwoorden')
+
+        #if 'Csv' in self.request.GET.get('submit_type', ''):
+        #    """ Provide CSV response"""
+        #    return export_csv(self.get_qs(), 'plaatsen')
+
+        #elif 'Excel' in self.request.GET.get('submit_type', ''):
+        #    """ Provide Excel response"""
+        #    return export_xlsx(self.get_qs(), 'plaatsen')
+        #elif 'Html' in self.request.GET.get('submit_type', ''):
+        #    """ Provide Html response"""
+        #    return export_html(self.get_qs(), 'plaatsen')
         else:
             return super(LocationListView, self).render_to_response(context, **response_kwargs)
 

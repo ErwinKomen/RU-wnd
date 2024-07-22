@@ -1017,6 +1017,20 @@ class Mijn(models.Model):
 
         return iPk
 
+    def get_columns():
+        """Get the names of all columns, assuming there is a 'point' defined"""
+
+        dic_column = {}
+        oErr = ErrHandle()
+        try:
+            for idx, obj in enumerate(Mijn.objects.exclude(point="").order_by('naam')):
+                dic_column[obj.naam] = idx + 1
+        except:
+            msg = oErr.get_error_message()
+            oErr.DoError("Mijn/get_columns")
+
+        return dic_column
+
     def get_item(self, oTime = None):
         oErr = ErrHandle()
         try:
@@ -1111,7 +1125,7 @@ class Entry(models.Model):
     def get_lemma_gloss(self):
         return self.lemma.gloss + '_' + self.woord
 
-    def get_row(self):
+    def get_row(self, dic_mijnen = None):
         arRow = []
         arRow.append(self.lemma.gloss)
         arRow.append(self.trefwoord.woord)
@@ -1119,6 +1133,15 @@ class Entry(models.Model):
         arRow.append(self.dialect.nieuw)
         arRow.append(self.aflevering.naam)
         arRow.append(self.descr.bronnenlijst)
+        # Do we need to add the mijn?
+        if not dic_mijnen is None:
+            # Get a list of the column indices in which this entry occurs
+            lst_mijn = [ dic_mijnen[x['naam']] for x in self.mijnlijst.all().values('naam')]
+            for k,v in dic_mijnen.items():
+                if v in lst_mijn:
+                    arRow.append(1)
+                else:
+                    arRow.append("")
         return arRow
 
     def get_tsv(self):

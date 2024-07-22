@@ -145,7 +145,6 @@ function do_search(el, sName, sType, pageNum) {
     if (sType === 'Herstel')
       return clearForm(sName);
     var f = $("#" + sName + "search");
-    // var sSearchType = $(el).attr('value');
     var url_prefix = $(".container").attr("url_home");
     var sPath = url_prefix;
     switch (sName) {

@@ -75,7 +75,7 @@ ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'e-wgd.science.ru.nl','131.174.114.22
 
 # Handling email on exceptions
 DEFAULT_FROM_EMAIL = 'diadict@science.ru.nl'
-ADMINS = [('Erwin', 'e.komen@ru.nl')]
+ADMINS = [('Erwin', 'erwin.komen@ru.nl')]
 
 # Application definition
 
