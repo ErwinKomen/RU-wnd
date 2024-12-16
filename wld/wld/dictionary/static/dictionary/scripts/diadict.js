@@ -14,16 +14,16 @@ var oProgressTimer = null;
 
 var loc_divErr = "diadict_err";
 
-// GOOGLE TRACKING STATISTICS
-(function (i, s, o, g, r, a, m) {
-  i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
-    (i[r].q = i[r].q || []).push(arguments)
-  }, i[r].l = 1 * new Date(); a = s.createElement(o),
-  m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
-})(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+//// GOOGLE TRACKING STATISTICS
+//(function (i, s, o, g, r, a, m) {
+//  i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+//    (i[r].q = i[r].q || []).push(arguments)
+//  }, i[r].l = 1 * new Date(); a = s.createElement(o),
+//  m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+//})(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
 
-ga('create', 'UA-90924826-1', 'auto');
-ga('send', 'pageview');
+//ga('create', 'UA-90924826-1', 'auto');
+//ga('send', 'pageview');
 // ==================================
 
 function errMsg(sMsg, ex) {
@@ -512,4 +512,20 @@ function set_search(sId) {
   } catch (ex) {
     errMsg("set_search", ex);
   }
+}
+
+function copy_download_png() {
+    var elThis = null;
+
+    try {
+        // Get the element
+        elThis = $(".modal-body").first();
+        if (elThis.length > 0) {
+            elThis[0].setAttribute('download', 'MintyPaper.png');
+            elThis[0].setAttribute('href', canvas.toDataURL("image/png").replace("image/png", "image/octet-stream"));
+            elThis[0].click();
+        }
+    } catch (ex) {
+        errMsg("copy_download_png", ex);
+    }
 }
